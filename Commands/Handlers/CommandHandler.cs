@@ -9,23 +9,47 @@ using System.Threading.Tasks;
 
 namespace izolabella.Discord.Commands.Handlers
 {
+    /// <summary>
+    /// General class for handling commands and providing events for commands.
+    /// </summary>
     public class CommandHandler
     {
         private bool allowBotInteractions;
+        /// <summary>
+        /// To allow or not to allow bots to interact be able to invoke the <see cref="CommandHandler.CommandInvoked"/> event and commands.
+        /// </summary>
         public bool AllowBotInteractions { get => this.allowBotInteractions; set => this.allowBotInteractions = value; }
+
+
         private DiscordSocketClient Reference { get; }
+
+
         private IReadOnlyCollection<CommandWrapper> Commands { get; }
 
+
+        /// <summary>
+        /// Command rejected.
+        /// </summary>
+        /// <param name="Sender"></param>
+        /// <param name="Arg">Arguments containing relevant information about the rejection.</param>
+        /// <returns></returns>
         public delegate Task CommandRejectedHandler(object Sender, CommandRejectedArgs Arg);
+        /// <summary>
+        /// Fires when the user in context is not allowed due to <see cref="CommandAttribute.Whitelist"/> or 
+        /// <see cref="CommandAttribute.Blacklist"/>, and if <see cref="CommandNeedsValidation"/> returns true.
+        /// </summary>
         public event CommandRejectedHandler? CommandRejected;
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Sender"></param>
+        /// <param name="Arg">Arguments containing relevant information about the invokation.</param>
+        /// <returns></returns>
+        public delegate Task CommandInvokedHandler(object Sender, CommandInvokedArgs Arg);
         /// <summary>
         /// Fires after the command has run.
         /// </summary>
-        /// <param name="Sender"></param>
-        /// <param name="Arg"></param>
-        /// <returns></returns>
-        public delegate Task CommandInvokedHandler(object Sender, CommandInvokedArgs Arg);
         public event CommandInvokedHandler? CommandInvoked;
 
         /// <summary>
@@ -33,6 +57,10 @@ namespace izolabella.Discord.Commands.Handlers
         /// </summary>
         public Func<SocketMessage, CommandAttribute, bool>? CommandNeedsValidation { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="CommandHandler"/>.
+        /// </summary>
+        /// <param name="Reference">The <see cref="DiscordSocketClient"/> reference this handler should use.</param>
         public CommandHandler(DiscordSocketClient Reference)
         {
             this.allowBotInteractions = false;
@@ -40,6 +68,10 @@ namespace izolabella.Discord.Commands.Handlers
             this.Commands = CommandSurgeon.GetCommandWrappers();
         }
 
+        /// <summary>
+        /// Makes the instance start receiving and handling messages.
+        /// </summary>
+        /// <returns></returns>
         public Task StartReceiving()
         {
             this.Reference.MessageReceived += this.Reference_MessageReceived;
