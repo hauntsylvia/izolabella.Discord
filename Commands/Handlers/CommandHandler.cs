@@ -31,7 +31,7 @@ namespace izolabella.Discord.Commands.Handlers
         /// <summary>
         /// Should return true if the message is valid for the command in context.
         /// </summary>
-        public Func<SocketMessage, CommandAttribute, bool>? MessageReceived { get; set; }
+        public Func<SocketMessage, CommandAttribute, bool>? CommandNeedsValidation { get; set; }
 
         public CommandHandler(DiscordSocketClient Reference)
         {
@@ -48,20 +48,21 @@ namespace izolabella.Discord.Commands.Handlers
 
         private async Task Reference_MessageReceived(SocketMessage Message)
         {
-            if(this.MessageReceived != null)
+            if(this.CommandNeedsValidation != null)
             {
                 if (!Message.Author.IsBot || this.AllowBotInteractions)
                 {
                     foreach (CommandWrapper Command in this.Commands)
                     {
                         bool IsWhitelisted = (Command.Attribute.Whitelist != null && Command.Attribute.Whitelist.Any(Id => Message.Author.Id == Id)) || Command.Attribute.Whitelist == null;
-                        bool IsBlacklisted = Command.Attribute.Blacklist != null && Command.Attribute.Blacklist.Any(Id => Message.Author.Id == Id);
-                        bool ValidMessage = this.MessageReceived.Invoke(Message, Command.Attribute);
+                        bool IsBlacklisted = (Command.Attribute.Blacklist != null && Command.Attribute.Blacklist.Any(Id => Message.Author.Id == Id)) || false;
+                        bool ValidMessage = this.CommandNeedsValidation.Invoke(Message, Command.Attribute);
                         if (IsWhitelisted && !IsBlacklisted && ValidMessage)
                         {
-                            Command.InvokeThis();
+                            Command.InvokeThis(Message);
                             if(this.CommandInvoked != null)
                                 await this.CommandInvoked.Invoke(this, new(Message, Command));
+                            break;
                         }
                         else if (ValidMessage && this.CommandRejected != null)
                             await this.CommandRejected.Invoke(this, new(Message, Command));

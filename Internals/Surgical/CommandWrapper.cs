@@ -1,4 +1,5 @@
-﻿using izolabella.Discord.Commands.Attributes;
+﻿using izolabella.Discord.Commands.Arguments;
+using izolabella.Discord.Commands.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +20,9 @@ namespace izolabella.Discord.Internals.Surgical
         public CommandAttribute Attribute { get; }
         private MethodInfo MethodInfo { get; }
 
-        public void InvokeThis()
+        public void InvokeThis(SocketMessage Context)
         {
-            this.MethodInfo.Invoke(this.Attribute, null);
+            this.MethodInfo.Invoke(this.Attribute, new object[] { new CommandArguments(Context) });
         }
     }
 }
