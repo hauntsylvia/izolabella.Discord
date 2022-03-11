@@ -6,9 +6,9 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>izolabella</Authors>
-	<Version>2.0.1</Version>
+	<Version>2.0.2</Version>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-	<PackageReleaseNotes>Register commands globally instead of per guild.</PackageReleaseNotes>
+	<PackageReleaseNotes>Register commands per guild again due to caching. This will more than likely become a toggle-able action later on.</PackageReleaseNotes>
 	<RepositoryUrl>https://github.com/izolabella/izolabella.Discord</RepositoryUrl>
 	<RepositoryType>github</RepositoryType>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
