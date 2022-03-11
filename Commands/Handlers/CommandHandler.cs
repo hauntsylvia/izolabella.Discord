@@ -71,21 +71,26 @@ namespace izolabella.Discord.Commands.Handlers
         /// <summary>
         /// Makes the instance start receiving and handling messages.
         /// </summary>
+        /// <param name="IgnoreExceptions">Set this to true if the bot should continue registering commands even if it doesn't have permissions in all guilds. (Recommended to keep this set to true)</param>
         /// <returns></returns>
-        public Task StartReceiving()
+        public Task StartReceiving(bool IgnoreExceptions = true)
         {
             foreach(CommandWrapper Command in this.Commands)
             {
                 SlashCommandBuilder SlashCommand = new();
                 SlashCommand.WithName(Command.Attribute.Tags.First().ToLower().Replace(' ', '-'));
                 SlashCommand.WithDescription(Command.Attribute.Description ?? "(no description)");
-                try
+                foreach (SocketGuild Guild in this.Reference.Guilds)
                 {
-                    this.Reference.CreateGlobalApplicationCommandAsync(SlashCommand.Build());
-                }
-                catch (HttpException CommandInvalidException)
-                {
-                    Console.WriteLine(CommandInvalidException);
+                    try
+                    {
+                        SocketApplicationCommand CommandCreated = Guild.CreateApplicationCommandAsync(SlashCommand.Build()).Result;
+                    }
+                    catch (Exception Exception)
+                    {
+                        if (!IgnoreExceptions)
+                            throw;
+                    }
                 }
             }
             this.Reference.SlashCommandExecuted += this.Reference_SlashCommandExecuted;
