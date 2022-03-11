@@ -8,10 +8,11 @@
     <Authors>izolabella</Authors>
 	<Version>2.0.2</Version>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-	<PackageReleaseNotes>Register commands per guild again due to caching. This will more than likely become a toggle-able action later on.</PackageReleaseNotes>
+	<PackageReleaseNotes>Added package description.</PackageReleaseNotes>
 	<RepositoryUrl>https://github.com/izolabella/izolabella.Discord</RepositoryUrl>
 	<RepositoryType>github</RepositoryType>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<Description>Command handling library for processing Discord slash commands.</Description>
   </PropertyGroup>
 
   <ItemGroup>
