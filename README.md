@@ -41,13 +41,15 @@ namespace MyDiscordBot.Commands
         }
     }
 }
+
 ```
-Messages must be validated manually for now, using the following code (or any code you want/need for command validation*).
+
+## This is no longer valid as of the 2.0.0 version.
+~~Messages must be validated manually for now, using the following code (or any code you want/need for command validation*).~~
 ```cs
 DiscordWrapper.CommandHandler.CommandNeedsValidation += (SocketMessage Message, CommandAttribute Attr) =>
             {
                 return Message.MentionedUsers.Any(User => User.Id == DiscordClient.CurrentUser.Id) && Attr.Tags.Any(Tag => Message.Content.ToLower().Contains(Tag.ToLower()));
             };
 ```
-
-**Once this is accomplished, call the method `DiscordWrapper.StartReceiving()` to allow the handler to begin processing messages.**
+**Once the above is accomplished, call the method `DiscordWrapper.StartReceiving()` to allow the handler to begin processing messages.**
