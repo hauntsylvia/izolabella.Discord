@@ -97,15 +97,15 @@ namespace izolabella.Discord.Commands.Handlers
 
         private async Task Reference_SlashCommandExecuted(SocketSlashCommand Arg)
         {
-            if (this.CommandNeedsValidation != null)
+            if (!Arg.User.IsBot || this.AllowBotInteractions)
             {
-                if (!Arg.User.IsBot || this.AllowBotInteractions)
+                foreach (CommandWrapper Command in this.Commands)
                 {
-                    foreach (CommandWrapper Command in this.Commands)
+                    if (Command.Attribute.Tags.First().ToLower().Replace(' ', '-') == Arg.Data.Name)
                     {
                         bool IsWhitelisted = (Command.Attribute.Whitelist != null && Command.Attribute.Whitelist.Any(Id => Arg.User.Id == Id)) || Command.Attribute.Whitelist == null;
                         bool IsBlacklisted = (Command.Attribute.Blacklist != null && Command.Attribute.Blacklist.Any(Id => Arg.User.Id == Id)) || false;
-                        bool ValidMessage = this.CommandNeedsValidation.Invoke(Arg, Command.Attribute);
+                        bool ValidMessage = this.CommandNeedsValidation?.Invoke(Arg, Command.Attribute) ?? true;
                         if (IsWhitelisted && !IsBlacklisted && ValidMessage)
                         {
                             Command.InvokeThis(Arg);
