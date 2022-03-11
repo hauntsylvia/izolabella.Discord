@@ -15,17 +15,17 @@ namespace izolabella.Discord.Commands.Arguments
         /// <summary>
         /// Initializes a new instance of <see cref="CommandInvokedArgs"/>
         /// </summary>
-        /// <param name="Message">The message that invoked the command.</param>
+        /// <param name="SlashCommand">The command context.</param>
         /// <param name="CommandInvoked">The command that was invoked.</param>
-        public CommandInvokedArgs(SocketMessage Message, CommandWrapper CommandInvoked)
+        public CommandInvokedArgs(SocketSlashCommand SlashCommand, CommandWrapper CommandInvoked)
         {
-            this.Message = Message;
+            this.SlashCommand = SlashCommand;
             this.CommandInvoked = CommandInvoked;
         }
         /// <summary>
-        /// The message that invoked the command.
+        /// The command context.
         /// </summary>
-        public SocketMessage Message { get; }
+        public SocketSlashCommand SlashCommand { get; }
         /// <summary>
         /// The command that was invoked.
         /// </summary>

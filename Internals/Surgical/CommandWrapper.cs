@@ -35,7 +35,7 @@ namespace izolabella.Discord.Internals.Surgical
         /// Invoke the wrapped <see cref="MethodInfo"/> for this command.
         /// </summary>
         /// <param name="Context">The message that invoked this command.</param>
-        public void InvokeThis(SocketMessage Context)
+        public void InvokeThis(SocketSlashCommand Context)
         {
             this.MethodInfo.Invoke(this.Attribute, new object[] { new CommandArguments(Context) });
         }

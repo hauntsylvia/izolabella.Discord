@@ -55,7 +55,7 @@ namespace izolabella.Discord.Commands.Handlers
         /// <summary>
         /// Should return true if the message is valid for the command in context.
         /// </summary>
-        public Func<SocketMessage, CommandAttribute, bool>? CommandNeedsValidation { get; set; }
+        public Func<SocketSlashCommand, CommandAttribute, bool>? CommandNeedsValidation { get; set; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="CommandHandler"/>.
@@ -74,30 +74,47 @@ namespace izolabella.Discord.Commands.Handlers
         /// <returns></returns>
         public Task StartReceiving()
         {
-            this.Reference.MessageReceived += this.Reference_MessageReceived;
+            foreach(CommandWrapper Command in this.Commands)
+            {
+                SlashCommandBuilder SlashCommand = new();
+                SlashCommand.WithName(Command.Attribute.Tags.First().ToLower().Replace(' ', '-'));
+                SlashCommand.WithDescription(Command.Attribute.Description ?? "(no description)");
+                foreach(SocketGuild Guild in this.Reference.Guilds)
+                {
+                    try
+                    {
+                        Guild.CreateApplicationCommandAsync(SlashCommand.Build());
+                    }
+                    catch(HttpException CommandInvalidException)
+                    {
+                        Console.WriteLine(CommandInvalidException);
+                    }
+                }
+            }
+            this.Reference.SlashCommandExecuted += this.Reference_SlashCommandExecuted;
             return Task.CompletedTask;
         }
 
-        private async Task Reference_MessageReceived(SocketMessage Message)
+        private async Task Reference_SlashCommandExecuted(SocketSlashCommand Arg)
         {
-            if(this.CommandNeedsValidation != null)
+            if (this.CommandNeedsValidation != null)
             {
-                if (!Message.Author.IsBot || this.AllowBotInteractions)
+                if (!Arg.User.IsBot || this.AllowBotInteractions)
                 {
                     foreach (CommandWrapper Command in this.Commands)
                     {
-                        bool IsWhitelisted = (Command.Attribute.Whitelist != null && Command.Attribute.Whitelist.Any(Id => Message.Author.Id == Id)) || Command.Attribute.Whitelist == null;
-                        bool IsBlacklisted = (Command.Attribute.Blacklist != null && Command.Attribute.Blacklist.Any(Id => Message.Author.Id == Id)) || false;
-                        bool ValidMessage = this.CommandNeedsValidation.Invoke(Message, Command.Attribute);
+                        bool IsWhitelisted = (Command.Attribute.Whitelist != null && Command.Attribute.Whitelist.Any(Id => Arg.User.Id == Id)) || Command.Attribute.Whitelist == null;
+                        bool IsBlacklisted = (Command.Attribute.Blacklist != null && Command.Attribute.Blacklist.Any(Id => Arg.User.Id == Id)) || false;
+                        bool ValidMessage = this.CommandNeedsValidation.Invoke(Arg, Command.Attribute);
                         if (IsWhitelisted && !IsBlacklisted && ValidMessage)
                         {
-                            Command.InvokeThis(Message);
-                            if(this.CommandInvoked != null)
-                                await this.CommandInvoked.Invoke(this, new(Message, Command));
+                            Command.InvokeThis(Arg);
+                            if (this.CommandInvoked != null)
+                                await this.CommandInvoked.Invoke(this, new(Arg, Command));
                             break;
                         }
                         else if (ValidMessage && this.CommandRejected != null)
-                            await this.CommandRejected.Invoke(this, new(Message, Command));
+                            await this.CommandRejected.Invoke(this, new(Arg, Command));
                     }
                 }
             }

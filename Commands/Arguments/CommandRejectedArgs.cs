@@ -15,17 +15,18 @@ namespace izolabella.Discord.Commands.Arguments
         /// <summary>
         /// Initializes a new instance of <see cref="CommandInvokedArgs"/>
         /// </summary>
-        /// <param name="Message">The message that was rejected.</param>
+        /// <param name="SlashCommand">The message that was rejected.</param>
         /// <param name="CommandRejected">The command that was rejected.</param>
-        public CommandRejectedArgs(SocketMessage Message, CommandWrapper CommandRejected)
+        public CommandRejectedArgs(SocketSlashCommand SlashCommand, CommandWrapper CommandRejected)
         {
-            this.Message = Message;
+            this.SlashCommand = SlashCommand;
             this.CommandRejected = CommandRejected;
         }
         /// <summary>
-        /// The message that was rejected.
+        /// The command context.
         /// </summary>
-        public SocketMessage Message { get; }
+        public SocketSlashCommand SlashCommand { get; }
+
         /// <summary>
         /// The command that was rejected.
         /// </summary>

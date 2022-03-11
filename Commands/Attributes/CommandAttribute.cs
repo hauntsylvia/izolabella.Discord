@@ -20,9 +20,11 @@ namespace izolabella.Discord.Commands.Attributes
         /// Initializes a new instance of the <see cref="CommandAttribute"/> class.
         /// </summary>
         /// <param name="Tags">Tags to search for within the <see cref="SocketMessage.Content"/> property.</param>
-        public CommandAttribute(string[] Tags)
+        /// <param name="Description">Description of this command.</param>
+        public CommandAttribute(string[] Tags, string? Description)
         {
             this.Tags = Tags;
+            this.Description = Description;
         }
 
 
@@ -32,11 +34,13 @@ namespace izolabella.Discord.Commands.Attributes
         /// <param name="Tags">Tags to search for within the <see cref="SocketMessage.Content"/> property.</param>
         /// <param name="Blacklist">The ids of Discord users to disallow from invoking this command.</param>
         /// <param name="Whitelist">The exclusive ids of Discord users to allow from invoking this command.</param>
-        public CommandAttribute(string[] Tags, ulong[]? Whitelist, ulong[] Blacklist)
+        /// <param name="Description">Description of this command.</param>
+        public CommandAttribute(string[] Tags, ulong[]? Whitelist, ulong[] Blacklist, string? Description)
         {
             this.Tags = Tags;
             this.Whitelist = Whitelist;
             this.Blacklist = Blacklist;
+            this.Description = Description;
         }
 
 
@@ -45,10 +49,12 @@ namespace izolabella.Discord.Commands.Attributes
         /// </summary>
         /// <param name="Tags">Tags to search for within the <see cref="SocketMessage.Content"/> property.</param>
         /// <param name="Whitelist">The exclusive ids of Discord users to allow from invoking this command.</param>
-        public CommandAttribute(string[] Tags, ulong[] Whitelist)
+        /// <param name="Description">Description of this command.</param>
+        public CommandAttribute(string[] Tags, ulong[] Whitelist, string? Description)
         {
             this.Tags = Tags;
             this.Whitelist = Whitelist;
+            this.Description = Description;
         }
 
         /// <summary>
@@ -65,5 +71,10 @@ namespace izolabella.Discord.Commands.Attributes
         /// An exclusive list of Discord users to disallow usage for this command to.
         /// </summary>
         public ulong[]? Blacklist { get; }
+
+        /// <summary>
+        /// Description of this command.
+        /// </summary>
+        public string? Description { get; }
     }
 }

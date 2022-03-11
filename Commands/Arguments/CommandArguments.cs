@@ -14,14 +14,14 @@ namespace izolabella.Discord.Commands.Arguments
         /// <summary>
         /// A class containing information used to pass along to the methods of commands.
         /// </summary>
-        public CommandArguments(SocketMessage Message)
+        public CommandArguments(SocketSlashCommand SlashCommand)
         {
-            this.Message = Message;
+            this.SlashCommand = SlashCommand;
         }
 
         /// <summary>
-        /// The message context for the command.
+        /// The command context.
         /// </summary>
-        public SocketMessage Message { get; }
+        public SocketSlashCommand SlashCommand { get; }
     }
 }
