@@ -86,7 +86,7 @@ namespace izolabella.Discord.Commands.Handlers
                     {
                         SocketApplicationCommand CommandCreated = Guild.CreateApplicationCommandAsync(SlashCommand.Build()).Result;
                     }
-                    catch (Exception Exception)
+                    catch (Exception)
                     {
                         if (!IgnoreExceptions)
                             throw;
@@ -99,6 +99,7 @@ namespace izolabella.Discord.Commands.Handlers
 
         private async Task Reference_SlashCommandExecuted(SocketSlashCommand Arg)
         {
+            await Arg.DeferAsync(true);
             if (!Arg.User.IsBot || this.AllowBotInteractions)
             {
                 foreach (CommandWrapper Command in this.Commands)
