@@ -34,17 +34,17 @@ namespace MyDiscordBot.Commands
 {
     public class Example
     {
-        [CommandAttribute(new string[] { "Tag1", "Tag2" })]
+        [CommandAttribute(new string[] { "Tag1", "Tag2" }, "Description of my command.)]
         public static void ExampleCommand(CommandArguments Args)
         {
-            Console.Out.WriteLine(Args.Message.Author.Username + " has fired this command!");
+            Console.Out.WriteLine(Args.User.UserName + " has fired this command!");
         }
     }
 }
 
 ```
 
-## This is no longer valid as of the 2.0.0 version.
+## This is no longer valid as of the >=2.0.0 versions.
 ~~Messages must be validated manually for now, using the following code (or any code you want/need for command validation*).~~
 ```cs
 DiscordWrapper.CommandHandler.CommandNeedsValidation += (SocketMessage Message, CommandAttribute Attr) =>
