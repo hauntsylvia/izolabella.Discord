@@ -79,16 +79,13 @@ namespace izolabella.Discord.Commands.Handlers
                 SlashCommandBuilder SlashCommand = new();
                 SlashCommand.WithName(Command.Attribute.Tags.First().ToLower().Replace(' ', '-'));
                 SlashCommand.WithDescription(Command.Attribute.Description ?? "(no description)");
-                foreach(SocketGuild Guild in this.Reference.Guilds)
+                try
                 {
-                    try
-                    {
-                        Guild.CreateApplicationCommandAsync(SlashCommand.Build());
-                    }
-                    catch(HttpException CommandInvalidException)
-                    {
-                        Console.WriteLine(CommandInvalidException);
-                    }
+                    this.Reference.CreateGlobalApplicationCommandAsync(SlashCommand.Build());
+                }
+                catch (HttpException CommandInvalidException)
+                {
+                    Console.WriteLine(CommandInvalidException);
                 }
             }
             this.Reference.SlashCommandExecuted += this.Reference_SlashCommandExecuted;
