@@ -99,7 +99,6 @@ namespace izolabella.Discord.Commands.Handlers
 
         private async Task Reference_SlashCommandExecuted(SocketSlashCommand Arg)
         {
-            await Arg.DeferAsync(true);
             if (!Arg.User.IsBot || this.AllowBotInteractions)
             {
                 foreach (CommandWrapper Command in this.Commands)
@@ -111,6 +110,8 @@ namespace izolabella.Discord.Commands.Handlers
                         bool ValidMessage = this.CommandNeedsValidation?.Invoke(Arg, Command.Attribute) ?? true;
                         if (IsWhitelisted && !IsBlacklisted && ValidMessage)
                         {
+                            if (Command.Attribute.Defer)
+                                await Arg.DeferAsync(Command.Attribute.LocalOnly);
                             Command.InvokeThis(Arg);
                             if (this.CommandInvoked != null)
                                 await this.CommandInvoked.Invoke(this, new(Arg, Command));

@@ -76,5 +76,18 @@ namespace izolabella.Discord.Commands.Attributes
         /// Description of this command.
         /// </summary>
         public string? Description { get; }
+
+        private bool defer = false;
+        /// <summary>
+        /// If true, this indicates the command needs more than 3 seconds to respond to the interaction.
+        /// </summary>
+        /// <remarks>This is especially useful if the comand depends on external APIs for data, or if it is just generally a time-intensive command.</remarks>
+        public bool Defer { get => this.defer; set => this.defer = value; }
+
+        private bool localOnly = false;
+        /// <summary>
+        /// If true, any responses will be sent to only the person who began the interaction.
+        /// </summary>
+        public bool LocalOnly { get => this.localOnly; set => this.localOnly = value; }
     }
 }
