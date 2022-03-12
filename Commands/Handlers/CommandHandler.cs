@@ -73,28 +73,46 @@ namespace izolabella.Discord.Commands.Handlers
         /// </summary>
         /// <param name="IgnoreExceptions">Set this to true if the bot should continue registering commands even if it doesn't have permissions in all guilds. (Recommended to keep this set to true)</param>
         /// <returns></returns>
-        public Task StartReceiving(bool IgnoreExceptions = true)
+        public async Task StartReceiving(bool IgnoreExceptions = true)
         {
-            foreach(CommandWrapper Command in this.Commands)
+            foreach(SocketGuild Guild in this.Reference.Guilds)
             {
-                SlashCommandBuilder SlashCommand = new();
-                SlashCommand.WithName(Command.Attribute.Tags.First().ToLower().Replace(' ', '-'));
-                SlashCommand.WithDescription(Command.Attribute.Description ?? "(no description)");
-                foreach (SocketGuild Guild in this.Reference.Guilds)
+                IReadOnlyCollection<SocketApplicationCommand> ExistingCommands = await Guild.GetApplicationCommandsAsync();
+                foreach (CommandWrapper Command in this.Commands)
                 {
-                    try
+                    SocketApplicationCommand? AlreadyExistingCommand = ExistingCommands.FirstOrDefault(ExistingCommand => ExistingCommand.Name == Command.SlashCommandTag);
+                    if (AlreadyExistingCommand == null)
                     {
-                        SocketApplicationCommand CommandCreated = Guild.CreateApplicationCommandAsync(SlashCommand.Build()).Result;
+                        SlashCommandBuilder SlashCommand = new();
+                        SlashCommand.WithName(Command.SlashCommandTag);
+                        SlashCommand.WithDescription(Command.Attribute.Description ?? "(no description)");
+                        try
+                        {
+                            SocketApplicationCommand CommandCreated = await Guild.CreateApplicationCommandAsync(SlashCommand.Build());
+                        }
+                        catch (Exception)
+                        {
+                            if (!IgnoreExceptions)
+                                throw;
+                        }
                     }
-                    catch (Exception)
+                    else
                     {
-                        if (!IgnoreExceptions)
-                            throw;
+                        await AlreadyExistingCommand.ModifyAsync(CommandStuff =>
+                        {
+                            CommandStuff.Name = Command.SlashCommandTag;
+                        });
+                    }
+                }
+                foreach(SocketApplicationCommand ExistingCommand in ExistingCommands)
+                {
+                    if(!this.Commands.Any(Command => Command.SlashCommandTag == ExistingCommand.Name))
+                    {
+                        await ExistingCommand.DeleteAsync();
                     }
                 }
             }
             this.Reference.SlashCommandExecuted += this.Reference_SlashCommandExecuted;
-            return Task.CompletedTask;
         }
 
         private async Task Reference_SlashCommandExecuted(SocketSlashCommand Arg)

@@ -29,6 +29,10 @@ namespace izolabella.Discord.Internals.Surgical
         /// This command's attribute.
         /// </summary>
         public CommandAttribute Attribute { get; }
+        /// <summary>
+        /// The slash command compliant name for this command.
+        /// </summary>
+        public string SlashCommandTag => this.Attribute.Tags.First().ToLower().Replace(' ', '-');
         private MethodInfo MethodInfo { get; }
 
         /// <summary>
