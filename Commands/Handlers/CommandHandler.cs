@@ -1,6 +1,7 @@
 ﻿using izolabella.Discord.Commands.Arguments;
 using izolabella.Discord.Commands.Attributes;
 using izolabella.Discord.Internals.Surgical;
+using izolabella.ConsoleHelper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,6 +67,7 @@ namespace izolabella.Discord.Commands.Handlers
             this.allowBotInteractions = false;
             this.Reference = Reference;
             this.Commands = CommandSurgeon.GetCommandWrappers();
+            PrettyConsole.Log($"{nameof(CommandHandler)} Initialization", $"New {nameof(CommandHandler)} initialized.", LoggingLevel.Information);
         }
 
         /// <summary>
@@ -75,8 +77,10 @@ namespace izolabella.Discord.Commands.Handlers
         /// <returns></returns>
         public async Task StartReceiving(bool IgnoreExceptions = true)
         {
-            foreach(SocketGuild Guild in this.Reference.Guilds)
+            PrettyConsole.Log($"{nameof(CommandHandler)} is receiving.", "", LoggingLevel.Information);
+            foreach (SocketGuild Guild in this.Reference.Guilds)
             {
+                PrettyConsole.Log($"Slash Command Updates", $"{nameof(CommandHandler)} is updating slash commands.", LoggingLevel.Information);
                 IReadOnlyCollection<SocketApplicationCommand> ExistingCommands = await Guild.GetApplicationCommandsAsync();
                 foreach (CommandWrapper Command in this.Commands)
                 {
@@ -89,26 +93,33 @@ namespace izolabella.Discord.Commands.Handlers
                         try
                         {
                             SocketApplicationCommand CommandCreated = await Guild.CreateApplicationCommandAsync(SlashCommand.Build());
+                            PrettyConsole.Log($"Command Creation.", $"The command {CommandCreated.Name} [{CommandCreated.Id}] has been created in guild of id {CommandCreated.Guild.Id}.", LoggingLevel.Information);
                         }
-                        catch (Exception)
+                        catch (Exception Exc)
                         {
                             if (!IgnoreExceptions)
+                            {
+                                PrettyConsole.Log($"Command Creation Failure", Exc, LoggingLevel.Errors);
                                 throw;
+                            }
                         }
                     }
                     else
                     {
+                        PrettyConsole.Log($"Command Already Exists", "Updating command's name if applicable.", LoggingLevel.Information);
                         await AlreadyExistingCommand.ModifyAsync(CommandStuff =>
                         {
                             CommandStuff.Name = Command.SlashCommandTag;
                         });
                     }
                 }
-                foreach(SocketApplicationCommand ExistingCommand in ExistingCommands)
+                foreach (SocketApplicationCommand ExistingCommand in ExistingCommands)
                 {
+                    PrettyConsole.Log("Checking command deletion applicability..", $"Finding and deleting commands that are not handled by this application but still registered as a slash command in Discord..", LoggingLevel.Information);
                     if(!this.Commands.Any(Command => Command.SlashCommandTag == ExistingCommand.Name))
                     {
                         await ExistingCommand.DeleteAsync();
+                        PrettyConsole.Log("Command Deletion", @$"The command ""{ExistingCommand.Name}"" of id [{ExistingCommand.Id}] has been deleted due to irrelevance.", LoggingLevel.Information);
                     }
                 }
             }
@@ -117,6 +128,7 @@ namespace izolabella.Discord.Commands.Handlers
 
         private async Task Reference_SlashCommandExecuted(SocketSlashCommand Arg)
         {
+            PrettyConsole.Log("Slash Command Request", $"Processing a new request made by user of id {Arg.Id}..", LoggingLevel.Information);
             if (!Arg.User.IsBot || this.AllowBotInteractions)
             {
                 foreach (CommandWrapper Command in this.Commands)
@@ -131,12 +143,16 @@ namespace izolabella.Discord.Commands.Handlers
                             if (Command.Attribute.Defer)
                                 await Arg.DeferAsync(Command.Attribute.LocalOnly);
                             Command.InvokeThis(Arg);
+                            PrettyConsole.Log("Slash Command Invoked", $"Slash command was invoked.", LoggingLevel.Information);
                             if (this.CommandInvoked != null)
                                 await this.CommandInvoked.Invoke(this, new(Arg, Command));
                             break;
                         }
                         else if (ValidMessage && this.CommandRejected != null)
+                        {
+                            PrettyConsole.Log("Slash Command Rejected", $"Slash command was rejected.", LoggingLevel.Information);
                             await this.CommandRejected.Invoke(this, new(Arg, Command));
+                        }
                     }
                 }
             }

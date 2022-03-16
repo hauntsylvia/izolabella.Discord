@@ -2,6 +2,7 @@
 global using Discord.Net;
 global using Discord.WebSocket;
 global using Discord;
+global using izolabella.ConsoleHelper;
 
 
 using izolabella.Discord.Commands.Handlers;
@@ -18,9 +19,11 @@ namespace izolabella.Discord
         /// Initializes a new instance of <see cref="DiscordWrapper"/>.
         /// </summary>
         /// <param name="Client">The <see cref="DiscordSocketClient"/> to be used.</param>
-        public DiscordWrapper(DiscordSocketClient Client)
+        /// <param name="LoggingLevel">The level for which this library should log important things to the console.</param>
+        public DiscordWrapper(DiscordSocketClient Client, LoggingLevel LoggingLevel = LoggingLevel.None)
         {
             this.Client = Client;
+            this.LoggingLevel = LoggingLevel;
             this.CommandHandler = new(Client);
         }
 
@@ -28,6 +31,10 @@ namespace izolabella.Discord
         /// The wrapped <see cref="DiscordSocketClient"/>.
         /// </summary>
         public DiscordSocketClient Client { get; }
+        /// <summary>
+        /// The level for which this library should log important things to the console.
+        /// </summary>
+        public LoggingLevel LoggingLevel { get; }
 
         /// <summary>
         /// The command handler to be used for this instance.
