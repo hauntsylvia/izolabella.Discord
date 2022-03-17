@@ -23,7 +23,6 @@ namespace izolabella.Discord.Internals.Surgical
             return Methods;
         }
 
-
         internal static IReadOnlyCollection<CommandWrapper> GetCommandWrappers()
         {
             List<CommandWrapper> Commands = new();

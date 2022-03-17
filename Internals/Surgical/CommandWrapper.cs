@@ -15,7 +15,7 @@ namespace izolabella.Discord.Internals.Surgical
     public class CommandWrapper
     {
         /// <summary>
-        /// Initializes a new <see cref="CommandWrapper"/>.
+        /// Initializes a new instance of the <see cref="CommandWrapper"/> class.
         /// </summary>
         /// <param name="Attribute">The attribute that applies to this command.</param>
         /// <param name="MethodInfo">The method to invoke for this command.</param>

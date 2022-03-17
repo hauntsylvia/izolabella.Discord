@@ -6,9 +6,9 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>izolabella</Authors>
-	<Version>2.2.0</Version>
+	<Version>2.2.1</Version>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-	<PackageReleaseNotes>Added console implementation.</PackageReleaseNotes>
+	<PackageReleaseNotes>Fixed an issue where old slash commands wouldn't get deleted.</PackageReleaseNotes>
 	<RepositoryUrl>https://github.com/izolabella/izolabella.Discord</RepositoryUrl>
 	<RepositoryType>github</RepositoryType>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -21,10 +21,7 @@
     <PackageReference Include="Discord.Net.Rest" Version="3.4.1" />
     <PackageReference Include="Discord.Net.Webhook" Version="3.4.1" />
     <PackageReference Include="Discord.Net.WebSocket" Version="3.4.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\izolabella.PrettyConsole\izolabella.PrettyConsole\izolabella.PrettyConsole.csproj" />
+    <PackageReference Include="izolabella.PrettyConsole" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>

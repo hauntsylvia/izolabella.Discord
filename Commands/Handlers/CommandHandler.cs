@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using izolabella.Discord.Internals.Structures.Commands;
 
 namespace izolabella.Discord.Commands.Handlers
 {
@@ -38,7 +39,7 @@ namespace izolabella.Discord.Commands.Handlers
         public event CommandRejectedHandler? CommandRejected;
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="CommandInvokedHandler"/> class.
         /// </summary>
         /// <param name="Sender"></param>
         /// <param name="Arg">Arguments containing relevant information about the invokation.</param>
@@ -55,7 +56,7 @@ namespace izolabella.Discord.Commands.Handlers
         public Func<SocketSlashCommand, CommandAttribute, bool>? CommandNeedsValidation { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="CommandHandler"/>.
+        /// Initializes a new instance of the <see cref="CommandHandler"/> class.
         /// </summary>
         /// <param name="Reference">The <see cref="DiscordSocketClient"/> reference this handler should use.</param>
         public CommandHandler(DiscordSocketClient Reference)
@@ -73,52 +74,7 @@ namespace izolabella.Discord.Commands.Handlers
         /// <returns></returns>
         public async Task StartReceiving(bool IgnoreExceptions = true)
         {
-            PrettyConsole.Log($"{nameof(CommandHandler)} is receiving.", "", LoggingLevel.Information);
-            foreach (SocketGuild Guild in this.Reference.Guilds)
-            {
-                PrettyConsole.Log($"Slash Command Updates", $"{nameof(CommandHandler)} is updating slash commands.", LoggingLevel.Information);
-                IReadOnlyCollection<SocketApplicationCommand> ExistingCommands = await Guild.GetApplicationCommandsAsync();
-                foreach (CommandWrapper Command in this.Commands)
-                {
-                    SocketApplicationCommand? AlreadyExistingCommand = ExistingCommands.FirstOrDefault(ExistingCommand => ExistingCommand.Name == Command.SlashCommandTag);
-                    if (AlreadyExistingCommand == null)
-                    {
-                        SlashCommandBuilder SlashCommand = new();
-                        SlashCommand.WithName(Command.SlashCommandTag);
-                        SlashCommand.WithDescription(Command.Attribute.Description ?? "(no description)");
-                        try
-                        {
-                            SocketApplicationCommand CommandCreated = await Guild.CreateApplicationCommandAsync(SlashCommand.Build());
-                            PrettyConsole.Log($"Command Creation.", $"The command {CommandCreated.Name} [{CommandCreated.Id}] has been created in guild of id {CommandCreated.Guild.Id}.", LoggingLevel.Information);
-                        }
-                        catch (Exception Exc)
-                        {
-                            if (!IgnoreExceptions)
-                            {
-                                PrettyConsole.Log($"Command Creation Failure", Exc, LoggingLevel.Errors);
-                                throw;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        PrettyConsole.Log($"Command Already Exists", "Updating command's name if applicable.", LoggingLevel.Information);
-                        await AlreadyExistingCommand.ModifyAsync(CommandStuff =>
-                        {
-                            CommandStuff.Name = Command.SlashCommandTag;
-                        });
-                    }
-                }
-                foreach (SocketApplicationCommand ExistingCommand in ExistingCommands)
-                {
-                    PrettyConsole.Log("Checking command deletion applicability..", $"Finding and deleting commands that are not handled by this application but still registered as a slash command in Discord..", LoggingLevel.Information);
-                    if(!this.Commands.Any(Command => Command.SlashCommandTag == ExistingCommand.Name))
-                    {
-                        await ExistingCommand.DeleteAsync();
-                        PrettyConsole.Log("Command Deletion", @$"The command ""{ExistingCommand.Name}"" of id [{ExistingCommand.Id}] has been deleted due to irrelevance.", LoggingLevel.Information);
-                    }
-                }
-            }
+            await new CommandValidator(this.Commands, this.Reference).Validate();
             this.Reference.SlashCommandExecuted += this.Reference_SlashCommandExecuted;
         }
 
