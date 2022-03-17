@@ -15,18 +15,14 @@ namespace izolabella.Discord.Commands.Handlers
     /// </summary>
     public class CommandHandler
     {
-        private bool allowBotInteractions;
         /// <summary>
         /// To allow or not to allow bots to interact be able to invoke the <see cref="CommandHandler.CommandInvoked"/> event and commands.
         /// </summary>
-        public bool AllowBotInteractions { get => this.allowBotInteractions; set => this.allowBotInteractions = value; }
-
+        public bool AllowBotInteractions { get; set; }
 
         private DiscordSocketClient Reference { get; }
 
-
         private IReadOnlyCollection<CommandWrapper> Commands { get; }
-
 
         /// <summary>
         /// Command rejected.
@@ -64,7 +60,7 @@ namespace izolabella.Discord.Commands.Handlers
         /// <param name="Reference">The <see cref="DiscordSocketClient"/> reference this handler should use.</param>
         public CommandHandler(DiscordSocketClient Reference)
         {
-            this.allowBotInteractions = false;
+            this.AllowBotInteractions = false;
             this.Reference = Reference;
             this.Commands = CommandSurgeon.GetCommandWrappers();
             PrettyConsole.Log($"{nameof(CommandHandler)} Initialization", $"New {nameof(CommandHandler)} initialized.", LoggingLevel.Information);
@@ -141,11 +137,17 @@ namespace izolabella.Discord.Commands.Handlers
                         if (IsWhitelisted && !IsBlacklisted && ValidMessage)
                         {
                             if (Command.Attribute.Defer)
+                            {
                                 await Arg.DeferAsync(Command.Attribute.LocalOnly);
+                            }
+
                             Command.InvokeThis(Arg);
                             PrettyConsole.Log("Slash Command Invoked", $"Slash command was invoked.", LoggingLevel.Information);
                             if (this.CommandInvoked != null)
+                            {
                                 await this.CommandInvoked.Invoke(this, new(Arg, Command));
+                            }
+
                             break;
                         }
                         else if (ValidMessage && this.CommandRejected != null)

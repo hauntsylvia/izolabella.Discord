@@ -4,9 +4,7 @@ global using Discord.WebSocket;
 global using Discord;
 global using izolabella.ConsoleHelper;
 
-
 using izolabella.Discord.Commands.Handlers;
-
 
 namespace izolabella.Discord
 {
@@ -23,7 +21,7 @@ namespace izolabella.Discord
         public DiscordWrapper(DiscordSocketClient Client, LoggingLevel LoggingLevel = LoggingLevel.None)
         {
             this.Client = Client;
-            this.LoggingLevel = LoggingLevel;
+            DiscordWrapper.LoggingLevel = LoggingLevel;
             this.CommandHandler = new(Client);
         }
 
@@ -34,7 +32,7 @@ namespace izolabella.Discord
         /// <summary>
         /// The level for which this library should log important things to the console.
         /// </summary>
-        public LoggingLevel LoggingLevel { get; }
+        public static LoggingLevel LoggingLevel { get => PrettyConsole.MinimumAcceptedLoggingLevel; set => PrettyConsole.MinimumAcceptedLoggingLevel = value; }
 
         /// <summary>
         /// The command handler to be used for this instance.
