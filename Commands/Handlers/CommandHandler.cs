@@ -92,7 +92,6 @@ namespace izolabella.Discord.Commands.Handlers
         {
             CommandCreator CommandCreator = new(this.Reference);
             await CommandCreator.UpdateCommands(this.Commands);
-            await CommandCreator.CreateCommands(this.Commands);
             this.Reference.SlashCommandExecuted += this.Reference_SlashCommandExecuted;
         }
 

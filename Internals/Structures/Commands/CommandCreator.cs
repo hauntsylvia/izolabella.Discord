@@ -32,7 +32,7 @@ namespace izolabella.Discord.Internals.Structures.Commands
         /// <param name="ToCreate">A <see cref="IReadOnlyCollection{CommandWrapper}"/> of <see cref="CommandWrapper"/> objects used to help 
         /// the method create the commands on Discord.</param>
         /// <returns></returns>
-        public async Task CreateCommands(IReadOnlyCollection<CommandWrapper> ToCreate)
+        private async Task CreateCommands(IReadOnlyCollection<CommandWrapper> ToCreate)
         {
             try
             {
@@ -98,6 +98,10 @@ namespace izolabella.Discord.Internals.Structures.Commands
                             await AlreadyExistingCommand.DeleteAsync();
                             await this.CreateCommands(new List<CommandWrapper>() { Command });
                         }
+                    }
+                    else
+                    {
+                        await this.CreateCommands(new List<CommandWrapper>() { Command });
                     }
                 }
                 if (ExistingCommands.Any(ExistingCommand => CurrentCommands.Any(CurrentCommand => ExistingCommand.Name != CurrentCommand.SlashCommandTag)))
