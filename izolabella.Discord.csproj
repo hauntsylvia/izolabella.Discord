@@ -6,13 +6,13 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>izolabella</Authors>
-	<Version>2.3.0</Version>
+	<Version>2.3.1</Version>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<PackageReleaseNotes>Added parameter support for the methods of commands.</PackageReleaseNotes>
 	<RepositoryUrl>https://github.com/izolabella/izolabella.Discord</RepositoryUrl>
 	<RepositoryType>github</RepositoryType>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<Description>Command handling library for processing Discord slash commands.</Description>
+	<Description>Fixed a bug where handling nullable primitive types wouldn't use its underlying type.</Description>
   </PropertyGroup>
 
   <ItemGroup>

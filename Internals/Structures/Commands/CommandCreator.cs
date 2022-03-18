@@ -92,7 +92,8 @@ namespace izolabella.Discord.Internals.Structures.Commands
                                     return AlreadyExistingOption.Name == CommandParameter.Name ||
                                     AlreadyExistingOption.Description == CommandParameter.Description;
                                 });
-                            });
+                            }) ||
+                            AlreadyExistingCommand.Options.Count != Command.GetCommandParameters().Count;
                         if (NeedsUpdate)
                         {
                             await AlreadyExistingCommand.DeleteAsync();

@@ -66,41 +66,45 @@ namespace izolabella.Discord.Internals.Surgical
             foreach(ParameterInfo Param in this.MethodInfo.GetParameters())
             {
                 ApplicationCommandOptionType? ParamType = null;
-                if (Param.ParameterType == typeof(bool))
+                Type? ParameterType = Nullable.GetUnderlyingType(Param.ParameterType) != null ? Nullable.GetUnderlyingType(Param.ParameterType) : Param.ParameterType;
+                if(ParameterType != null)
                 {
-                    ParamType = ApplicationCommandOptionType.Boolean;
-                }
-                else if (Param.ParameterType == typeof(string))
-                {
-                    ParamType = ApplicationCommandOptionType.String;
-                }
-                else if (Param.ParameterType == typeof(int))
-                {
-                    ParamType = ApplicationCommandOptionType.Integer;
-                }
-                else if(Param.ParameterType == typeof(double))
-                {
-                    ParamType = ApplicationCommandOptionType.Number;
-                }
-                else if (typeof(IMentionable).IsAssignableFrom(Param.ParameterType))
-                {
-                    ParamType = ApplicationCommandOptionType.Mentionable;
-                }
-                else if (typeof(IUser).IsAssignableFrom(Param.ParameterType))
-                {
-                    ParamType = ApplicationCommandOptionType.User;
-                }
-                else if (typeof(IRole).IsAssignableFrom(Param.ParameterType))
-                {
-                    ParamType = ApplicationCommandOptionType.Role;
-                }
-                else if (typeof(IGuildChannel).IsAssignableFrom(Param.ParameterType))
-                {
-                    ParamType = ApplicationCommandOptionType.Channel;
-                }
-                if (ParamType != null && Param.Name != null)
-                {
-                    Params.Add(new(Param.Name, Param.Name, (ApplicationCommandOptionType)ParamType, !(!Param.ParameterType.IsValueType || Nullable.GetUnderlyingType(Param.ParameterType) != null)));
+                    if (ParameterType == typeof(bool))
+                    {
+                        ParamType = ApplicationCommandOptionType.Boolean;
+                    }
+                    else if (ParameterType == typeof(string))
+                    {
+                        ParamType = ApplicationCommandOptionType.String;
+                    }
+                    else if (ParameterType == typeof(int))
+                    {
+                        ParamType = ApplicationCommandOptionType.Integer;
+                    }
+                    else if (ParameterType == typeof(double))
+                    {
+                        ParamType = ApplicationCommandOptionType.Number;
+                    }
+                    else if (typeof(IMentionable).IsAssignableFrom(ParameterType))
+                    {
+                        ParamType = ApplicationCommandOptionType.Mentionable;
+                    }
+                    else if (typeof(IUser).IsAssignableFrom(ParameterType))
+                    {
+                        ParamType = ApplicationCommandOptionType.User;
+                    }
+                    else if (typeof(IRole).IsAssignableFrom(ParameterType))
+                    {
+                        ParamType = ApplicationCommandOptionType.Role;
+                    }
+                    else if (typeof(IGuildChannel).IsAssignableFrom(ParameterType))
+                    {
+                        ParamType = ApplicationCommandOptionType.Channel;
+                    }
+                    if (ParamType != null && Param.Name != null)
+                    {
+                        Params.Add(new(Param.Name, Param.Name, (ApplicationCommandOptionType)ParamType, !(!ParameterType.IsValueType || Nullable.GetUnderlyingType(ParameterType) != null)));
+                    }
                 }
             }
             return Params;
