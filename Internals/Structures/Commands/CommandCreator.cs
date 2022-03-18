@@ -83,8 +83,21 @@ namespace izolabella.Discord.Internals.Structures.Commands
                     SocketApplicationCommand? AlreadyExistingCommand = ExistingCommands.FirstOrDefault(ExistingCommand => ExistingCommand.Name == Command.SlashCommandTag);
                     if (AlreadyExistingCommand != null)
                     {
-                        await AlreadyExistingCommand.DeleteAsync();
-                        await this.CreateCommands(new List<CommandWrapper>() { Command });
+                        bool NeedsUpdate = AlreadyExistingCommand.Name != Command.SlashCommandTag ||
+                            AlreadyExistingCommand.Description != Command.Attribute.Description ||
+                            !AlreadyExistingCommand.Options.All(AlreadyExistingOption =>
+                            {
+                                return !Command.GetCommandParameters().All(CommandParameter =>
+                                {
+                                    return AlreadyExistingOption.Name == CommandParameter.Name ||
+                                    AlreadyExistingOption.Description == CommandParameter.Description;
+                                });
+                            });
+                        if (NeedsUpdate)
+                        {
+                            await AlreadyExistingCommand.DeleteAsync();
+                            await this.CreateCommands(new List<CommandWrapper>() { Command });
+                        }
                     }
                 }
                 if (ExistingCommands.Any(ExistingCommand => CurrentCommands.Any(CurrentCommand => ExistingCommand.Name != CurrentCommand.SlashCommandTag)))

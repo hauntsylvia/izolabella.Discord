@@ -43,10 +43,15 @@ namespace izolabella.Discord.Internals.Surgical
         /// <param name="Context">The message that invoked this command.</param>
         public void InvokeThis(SocketSlashCommand Context)
         {
-            List<object> Params = new() { new CommandArguments(Context) };
+            List<object?> Params = new() { new CommandArguments(Context) };
             foreach(SocketSlashCommandDataOption Parameter in Context.Data.Options)
             {
                 Params.Add(Parameter.Value);
+            }
+            int ParamCount = this.MethodInfo.GetParameters().Length;
+            for(int I = 0; I < ParamCount - Params.Count; I++)
+            {
+                Params.Add(null);
             }
             this.MethodInfo.Invoke(this.Attribute, Params.ToArray());
         }
