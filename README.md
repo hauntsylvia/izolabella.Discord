@@ -28,28 +28,18 @@ to interact with the `CommandHandler` or not.
 DiscordWrapper.CommandHandler.AllowBotInteractions = false;
 ```
 
-To mark a method as a command, the `CommandAttribute` attribute should be attached to a method with a `CommandArguments` parameter.
+To mark a method as a command, the `CommandAttribute` attribute should be attached to a method with a `CommandArguments` parameter. Other parameters may be provided as `Option`s in Discord. [Read more](https://discord.com/developers/docs/interactions/application-commands) about slash command options.
 ```cs
 namespace MyDiscordBot.Commands
 {
     public class Example
     {
-        [CommandAttribute(new string[] { "Tag1", "Tag2" }, "Description of my command.)]
-        public static void ExampleCommand(CommandArguments Args)
+        [CommandAttribute(new string[] { "slash-command", }, "Description of my slash command.)]
+        public static void ExampleCommand(CommandArguments Args, double FirstParameter, string? SecondOptionalParameter)
         {
-            Console.Out.WriteLine(Args.User.UserName + " has fired this command!");
+            Console.Out.WriteLine(Args.User.UserName + $" has fired this command with the following parameters:\n{FirstParameter}, {(SecondOptionalParameter ?? "[no second param]")}");
         }
     }
 }
-
 ```
-
-## This is no longer valid as of the >=2.0.0 versions.
-~~Messages must be validated manually for now, using the following code (or any code you want/need for command validation*).~~
-```cs
-DiscordWrapper.CommandHandler.CommandNeedsValidation += (SocketMessage Message, CommandAttribute Attr) =>
-            {
-                return Message.MentionedUsers.Any(User => User.Id == DiscordClient.CurrentUser.Id) && Attr.Tags.Any(Tag => Message.Content.ToLower().Contains(Tag.ToLower()));
-            };
-```
-**Once the above is accomplished, call the method `DiscordWrapper.StartReceiving()` to allow the handler to begin processing messages.**
+**Once the above is accomplished, call the `DiscordWrapper.StartReceiving()` method to allow the handler to begin processing your commands.**
