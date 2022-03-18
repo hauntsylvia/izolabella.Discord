@@ -1,5 +1,6 @@
 ﻿using izolabella.Discord.Commands.Arguments;
 using izolabella.Discord.Commands.Attributes;
+using izolabella.Discord.Internals.Structures.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,7 @@ namespace izolabella.Discord.Internals.Surgical
         /// This command's attribute.
         /// </summary>
         public CommandAttribute Attribute { get; }
+
         /// <summary>
         /// The slash command compliant name for this command.
         /// </summary>
@@ -36,12 +38,67 @@ namespace izolabella.Discord.Internals.Surgical
         private MethodInfo MethodInfo { get; }
 
         /// <summary>
-        /// Invoke the wrapped <see cref="MethodInfo"/> for this command.
+        /// Invokes the wrapped <see cref="MethodInfo"/> for this command.
         /// </summary>
         /// <param name="Context">The message that invoked this command.</param>
         public void InvokeThis(SocketSlashCommand Context)
         {
-            this.MethodInfo.Invoke(this.Attribute, new object[] { new CommandArguments(Context) });
+            List<object> Params = new() { new CommandArguments(Context) };
+            foreach(SocketSlashCommandDataOption Parameter in Context.Data.Options)
+            {
+                Params.Add(Parameter.Value);
+            }
+            this.MethodInfo.Invoke(this.Attribute, Params.ToArray());
+        }
+
+        /// <summary>
+        /// Gets a list of <see cref="CommandParameter"/> objects for this command's parameter information.
+        /// </summary>
+        /// <returns></returns>
+        public IReadOnlyCollection<CommandParameter> GetCommandParameters()
+        {
+            List<CommandParameter> Params = new();
+            foreach(ParameterInfo Param in this.MethodInfo.GetParameters())
+            {
+                ApplicationCommandOptionType? ParamType = null;
+                if (Param.ParameterType == typeof(bool))
+                {
+                    ParamType = ApplicationCommandOptionType.Boolean;
+                }
+                else if (Param.ParameterType == typeof(string))
+                {
+                    ParamType = ApplicationCommandOptionType.String;
+                }
+                else if (Param.ParameterType == typeof(int))
+                {
+                    ParamType = ApplicationCommandOptionType.Integer;
+                }
+                else if(Param.ParameterType == typeof(double))
+                {
+                    ParamType = ApplicationCommandOptionType.Number;
+                }
+                else if (typeof(IMentionable).IsAssignableFrom(Param.ParameterType))
+                {
+                    ParamType = ApplicationCommandOptionType.Mentionable;
+                }
+                else if (typeof(IUser).IsAssignableFrom(Param.ParameterType))
+                {
+                    ParamType = ApplicationCommandOptionType.User;
+                }
+                else if (typeof(IRole).IsAssignableFrom(Param.ParameterType))
+                {
+                    ParamType = ApplicationCommandOptionType.Role;
+                }
+                else if (typeof(IGuildChannel).IsAssignableFrom(Param.ParameterType))
+                {
+                    ParamType = ApplicationCommandOptionType.Channel;
+                }
+                if (ParamType != null && Param.Name != null)
+                {
+                    Params.Add(new(Param.Name, Param.Name, (ApplicationCommandOptionType)ParamType, !(!Param.ParameterType.IsValueType || Nullable.GetUnderlyingType(Param.ParameterType) != null)));
+                }
+            }
+            return Params;
         }
     }
 }

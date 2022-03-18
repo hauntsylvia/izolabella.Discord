@@ -15,19 +15,28 @@ namespace izolabella.Discord.Internals.Structures.Commands
         /// Initializes a new instance of the <see cref="CommandParameter"/> class.
         /// </summary>
         /// <param name="Name">Name of the parameter.</param>
+        /// <param name="Description">Description of the parameter.</param>
         /// <param name="ParameterType">The type of parameter.</param>
         /// <param name="IsRequired">Determines whether this parameter is required or optional.</param>
-        public CommandParameter(string Name, ApplicationCommandOptionType ParameterType, bool IsRequired)
+        public CommandParameter(string Name, string Description, ApplicationCommandOptionType ParameterType, bool IsRequired)
         {
-            this.Name = Name;
+            this.name = Name;
+            this.Description = Description;
             this.ParameterType = ParameterType;
             this.IsRequired = IsRequired;
         }
 
+        private readonly string name;
         /// <summary>
         /// The name of the parameter.
         /// </summary>
-        public string Name { get; }
+        public string Name => this.name.ToLower();
+
+        /// <summary>
+        /// The description of the parameter.
+        /// </summary>
+        public string Description { get; }
+
         /// <summary>
         /// The type of parameter.
         /// </summary>

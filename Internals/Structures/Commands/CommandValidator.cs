@@ -9,6 +9,33 @@ using System.Threading.Tasks;
 namespace izolabella.Discord.Internals.Structures.Commands
 {
     /// <summary>
+    /// Reasons a command request may be invalid.
+    /// </summary>
+    public enum InvalidCommandReasons
+    {
+        /// <summary>
+        /// The parameters the command requires are not of the same type.
+        /// </summary>
+        Required_Parameters_Are_Incorrect,
+        /// <summary>
+        /// The parameters the command requires were not found in the request.
+        /// </summary>
+        Required_Parameters_Are_Missing,
+        /// <summary>
+        /// The user is blacklisted from this command.
+        /// </summary>
+        User_Is_Blacklisted,
+        /// <summary>
+        /// The user is not whitelisted for this command.
+        /// </summary>
+        User_Is_Not_Whitelisted,
+        /// <summary>
+        /// The reason is unknown.
+        /// </summary>
+        Unknown
+    }
+
+    /// <summary>
     /// A class for processing commands that already exist.
     /// </summary>
     public class CommandValidator
@@ -16,71 +43,54 @@ namespace izolabella.Discord.Internals.Structures.Commands
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandValidator"/> class.
         /// </summary>
-        /// <param name="CurrentCommands"></param>
         /// <param name="Instance"></param>
-        public CommandValidator(IReadOnlyCollection<CommandWrapper> CurrentCommands, DiscordSocketClient Instance)
+        public CommandValidator(CommandHandler Instance)
         {
-            this.CurrentCommands = CurrentCommands;
             this.Instance = Instance;
         }
 
         /// <summary>
-        /// The current commands used by the caller.
-        /// </summary>
-        public IReadOnlyCollection<CommandWrapper> CurrentCommands { get; }
-
-        /// <summary>
         /// The instance this class should use.
         /// </summary>
-        public DiscordSocketClient Instance { get; }
+        public CommandHandler Instance { get; }
 
         /// <summary>
-        /// Delete or modify existing commands.
+        /// Validate a request.
         /// </summary>
-        /// <returns></returns>
-        public async Task Validate()
+        /// <param name="DiscordCommand"></param>
+        /// <param name="CommandRelevance"></param>
+        /// <returns>A reason the request is invalid, or null if the request is valid.</returns>
+        public static InvalidCommandReasons? ValidateCommand(SocketSlashCommand DiscordCommand, CommandWrapper CommandRelevance)
         {
-            PrettyConsole.Log($"{nameof(CommandHandler)} Recieving.", $"An instance of the class {nameof(CommandHandler)} is ready to process commands.", LoggingLevel.Information);
-            foreach (SocketGuild Guild in this.Instance.Guilds)
+            bool IsWhitelisted = (CommandRelevance.Attribute.Whitelist != null && CommandRelevance.Attribute.Whitelist.Any(Id => DiscordCommand.User.Id == Id)) || CommandRelevance.Attribute.Whitelist == null;
+            bool IsBlacklisted = (CommandRelevance.Attribute.Blacklist != null && CommandRelevance.Attribute.Blacklist.Any(Id => DiscordCommand.User.Id == Id)) || false;
+            if (!IsWhitelisted)
             {
-                PrettyConsole.Log($"Slash Command Updates", $"{nameof(CommandHandler)} is updating slash commands.", LoggingLevel.Information);
-                IReadOnlyCollection<SocketApplicationCommand> ExistingCommands = await Guild.GetApplicationCommandsAsync();
-                foreach (CommandWrapper Command in this.CurrentCommands)
+                return InvalidCommandReasons.User_Is_Not_Whitelisted;
+            }
+            else if (IsBlacklisted)
+            {
+                return InvalidCommandReasons.User_Is_Blacklisted;
+            }
+            IReadOnlyCollection<CommandParameter> Parameters = CommandRelevance.GetCommandParameters();
+            foreach (SocketSlashCommandDataOption Option in DiscordCommand.Data.Options)
+            {
+                foreach (CommandParameter Param in Parameters)
                 {
-                    SocketApplicationCommand? AlreadyExistingCommand = ExistingCommands.FirstOrDefault(ExistingCommand => ExistingCommand.Name == Command.SlashCommandTag);
-                    if (AlreadyExistingCommand == null)
+                    if (Param.Name == Option.Name && Option.Type != Param.ParameterType)
                     {
-                        SlashCommandBuilder SlashCommand = new();
-                        SlashCommand.WithName(Command.SlashCommandTag);
-                        SlashCommand.WithDescription(Command.Attribute.Description ?? "(no description)");
-                        SocketGuildUser CurrentUser = Guild.GetUser(this.Instance.CurrentUser.Id);
-                        if (CurrentUser.GuildPermissions.UseApplicationCommands)
-                        {
-                            SocketApplicationCommand CommandCreated = await Guild.CreateApplicationCommandAsync(SlashCommand.Build());
-                        }
-                    }
-                    else
-                    {
-                        if (AlreadyExistingCommand.Description != Command.Attribute.Description)
-                        {
-                            await AlreadyExistingCommand.ModifyAsync(CommandStuff =>
-                            {
-                                CommandStuff.Name = Command.SlashCommandTag;
-                            });
-                            PrettyConsole.Log($"Command Already Exists", "Updated command's description.", LoggingLevel.Information);
-                        }
-                    }
-                }
-                if (ExistingCommands.Any(ExistingCommand => this.CurrentCommands.Any(CurrentCommand => ExistingCommand.Name != CurrentCommand.SlashCommandTag)))
-                {
-                    IEnumerable<SocketApplicationCommand> ForDeletion = ExistingCommands.Where(ExistingCommand => !this.CurrentCommands.Any(CurrentCommand => ExistingCommand.Name == CurrentCommand.SlashCommandTag));
-                    foreach (SocketApplicationCommand ToDelete in ForDeletion)
-                    {
-                        await ToDelete.DeleteAsync();
-                        PrettyConsole.Log("Command Deletion", @$"The command ""{ToDelete.Name}"" of id [{ToDelete.Id}] has been deleted due to irrelevance.", LoggingLevel.Information);
+                        return InvalidCommandReasons.Required_Parameters_Are_Incorrect;
                     }
                 }
             }
+            foreach (CommandParameter Param in Parameters)
+            {
+                if (Param.IsRequired && !DiscordCommand.Data.Options.Any(O => O.Name == Param.Name))
+                {
+                    return InvalidCommandReasons.Required_Parameters_Are_Missing;
+                }
+            }
+            return null;
         }
     }
 }
