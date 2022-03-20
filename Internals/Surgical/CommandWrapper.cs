@@ -1,6 +1,7 @@
 ﻿using izolabella.Discord.Commands.Arguments;
 using izolabella.Discord.Commands.Attributes;
 using izolabella.Discord.Internals.Structures.Commands;
+using izolabella.Discord.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,44 +67,59 @@ namespace izolabella.Discord.Internals.Surgical
             foreach(ParameterInfo Param in this.MethodInfo.GetParameters())
             {
                 ApplicationCommandOptionType? ParamType = null;
-                Type? ParameterType = Nullable.GetUnderlyingType(Param.ParameterType) ?? Param.ParameterType;
-                if(ParameterType != null)
+                Type UnderlyingOrRealType = Nullable.GetUnderlyingType(Param.ParameterType) ?? Param.ParameterType;
+                if(UnderlyingOrRealType != null)
                 {
-                    if (ParameterType == typeof(bool))
+                    if (UnderlyingOrRealType == typeof(bool))
                     {
                         ParamType = ApplicationCommandOptionType.Boolean;
                     }
-                    else if (ParameterType == typeof(string))
+                    else if (UnderlyingOrRealType == typeof(string))
                     {
                         ParamType = ApplicationCommandOptionType.String;
                     }
-                    else if (ParameterType == typeof(int))
+                    else if (UnderlyingOrRealType == typeof(int))
                     {
                         ParamType = ApplicationCommandOptionType.Integer;
                     }
-                    else if (ParameterType == typeof(double))
+                    else if (UnderlyingOrRealType == typeof(double))
                     {
                         ParamType = ApplicationCommandOptionType.Number;
                     }
-                    else if (typeof(IMentionable).IsAssignableFrom(ParameterType))
+                    else if (typeof(IMentionable).IsAssignableFrom(UnderlyingOrRealType))
                     {
                         ParamType = ApplicationCommandOptionType.Mentionable;
                     }
-                    else if (typeof(IUser).IsAssignableFrom(ParameterType))
+                    else if (typeof(IUser).IsAssignableFrom(UnderlyingOrRealType))
                     {
                         ParamType = ApplicationCommandOptionType.User;
                     }
-                    else if (typeof(IRole).IsAssignableFrom(ParameterType))
+                    else if (typeof(IRole).IsAssignableFrom(UnderlyingOrRealType))
                     {
                         ParamType = ApplicationCommandOptionType.Role;
                     }
-                    else if (typeof(IGuildChannel).IsAssignableFrom(ParameterType))
+                    else if (typeof(IGuildChannel).IsAssignableFrom(UnderlyingOrRealType))
                     {
                         ParamType = ApplicationCommandOptionType.Channel;
                     }
                     if (ParamType != null && Param.Name != null)
                     {
-                        Params.Add(new(Param.Name, Param.Name, (ApplicationCommandOptionType)ParamType, !(!ParameterType.IsValueType || Nullable.GetUnderlyingType(ParameterType) != null)));
+                        bool IsOptional = false;
+                        if (Nullable.GetUnderlyingType(Param.ParameterType) == null || ParamType.Value == ApplicationCommandOptionType.String)
+                        {
+                            IsOptional = false;
+                        }
+                        else if (Nullable.GetUnderlyingType(Param.ParameterType) != null || Param.ParameterType.GetCustomAttributes().Any(Attribute =>
+                        {
+                            string? Name = Attribute.GetType()?.Name;
+                            return Name != null && Name == "NullableAttribute";
+                        }))
+                        {
+                            IsOptional = true;
+                        }
+                        //bool IsRequired = !(ParameterType.IsValueType || Nullable.GetUnderlyingType(ParameterType) == null);
+                        //bool IsRequired = !(Nullable.GetUnderlyingType(ParameterType) != null || !ParameterType.IsValueType);
+                        Params.Add(new(Param.Name, Param.Name, ParamType.Value, IsOptional));
                     }
                 }
             }
