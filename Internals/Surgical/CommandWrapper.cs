@@ -66,7 +66,7 @@ namespace izolabella.Discord.Internals.Surgical
             foreach(ParameterInfo Param in this.MethodInfo.GetParameters())
             {
                 ApplicationCommandOptionType? ParamType = null;
-                Type? ParameterType = Nullable.GetUnderlyingType(Param.ParameterType) != null ? Nullable.GetUnderlyingType(Param.ParameterType) : Param.ParameterType;
+                Type? ParameterType = Nullable.GetUnderlyingType(Param.ParameterType) ?? Param.ParameterType;
                 if(ParameterType != null)
                 {
                     if (ParameterType == typeof(bool))
