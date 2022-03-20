@@ -44,17 +44,28 @@ namespace izolabella.Discord.Internals.Surgical
         /// <param name="Context">The message that invoked this command.</param>
         public void InvokeThis(SocketSlashCommand Context)
         {
-            List<object?> Params = new() { new CommandArguments(Context) };
-            foreach(SocketSlashCommandDataOption Parameter in Context.Data.Options)
+            try
             {
-                Params.Add(Parameter.Value);
+                object[] ParamsObjs = new object[this.MethodInfo.GetParameters().Length];
+                ParamsObjs[0] = new CommandArguments(Context);
+                int CurrentIndexOfParameter = 1;
+                foreach (ParameterInfo ParameterOfMethod in this.MethodInfo.GetParameters())
+                {
+                    foreach (SocketSlashCommandDataOption Parameter in Context.Data.Options)
+                    {
+                        if(ParameterOfMethod.Name != null && Parameter.Name.ToLower() == ParameterOfMethod.Name.ToLower())
+                        {
+                            ParamsObjs[CurrentIndexOfParameter] = Parameter.Value;
+                            CurrentIndexOfParameter++;
+                        }
+                    }
+                }
+                this.MethodInfo.Invoke(this.Attribute, ParamsObjs);
             }
-            int ParamCount = this.MethodInfo.GetParameters().Length;
-            for(int I = 0; I < ParamCount - Params.Count; I++)
+            catch (Exception Ex)
             {
-                Params.Add(null);
+                Console.WriteLine(Ex);
             }
-            this.MethodInfo.Invoke(this.Attribute, Params.ToArray());
         }
 
         /// <summary>
@@ -86,10 +97,6 @@ namespace izolabella.Discord.Internals.Surgical
                     {
                         ParamType = ApplicationCommandOptionType.Number;
                     }
-                    else if (typeof(IMentionable).IsAssignableFrom(UnderlyingOrRealType))
-                    {
-                        ParamType = ApplicationCommandOptionType.Mentionable;
-                    }
                     else if (typeof(IUser).IsAssignableFrom(UnderlyingOrRealType))
                     {
                         ParamType = ApplicationCommandOptionType.User;
@@ -102,24 +109,25 @@ namespace izolabella.Discord.Internals.Surgical
                     {
                         ParamType = ApplicationCommandOptionType.Channel;
                     }
+                    else if (typeof(IMentionable).IsAssignableFrom(UnderlyingOrRealType))
+                    {
+                        ParamType = ApplicationCommandOptionType.Mentionable;
+                    }
                     if (ParamType != null && Param.Name != null)
                     {
-                        bool IsOptional = false;
-                        if (Nullable.GetUnderlyingType(Param.ParameterType) == null || ParamType.Value == ApplicationCommandOptionType.String)
+                        bool IsNullable = Nullable.GetUnderlyingType(Param.ParameterType) != null || ValueTypeHelper.IsNullable(Param.ParameterType);
+                        bool IsRequired = false;
+                        if (!IsNullable)
                         {
-                            IsOptional = false;
+                            IsRequired = true;
                         }
-                        else if (Nullable.GetUnderlyingType(Param.ParameterType) != null || Param.ParameterType.GetCustomAttributes().Any(Attribute =>
+                        else if (IsNullable)
                         {
-                            string? Name = Attribute.GetType()?.Name;
-                            return Name != null && Name == "NullableAttribute";
-                        }))
-                        {
-                            IsOptional = true;
+                            IsRequired = false;
                         }
                         //bool IsRequired = !(ParameterType.IsValueType || Nullable.GetUnderlyingType(ParameterType) == null);
                         //bool IsRequired = !(Nullable.GetUnderlyingType(ParameterType) != null || !ParameterType.IsValueType);
-                        Params.Add(new(Param.Name, Param.Name, ParamType.Value, IsOptional));
+                        Params.Add(new(Param.Name, Param.Name, ParamType.Value, IsRequired));
                     }
                 }
             }

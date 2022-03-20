@@ -6,13 +6,13 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>izolabella</Authors>
-	<Version>2.3.1</Version>
+	<Version>2.3.2</Version>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<PackageReleaseNotes>Added parameter support for the methods of commands.</PackageReleaseNotes>
 	<RepositoryUrl>https://github.com/izolabella/izolabella.Discord</RepositoryUrl>
 	<RepositoryType>github</RepositoryType>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<Description>Fixed a bug where handling nullable primitive types wouldn't use its underlying type.</Description>
+	<Description>Fixed a bug where handling nullable primitive types wouldn't use its underlying type again, and worked on parameter ordering. Fixed IMentionable coming before the other interfaces.</Description>
   </PropertyGroup>
 
   <ItemGroup>
