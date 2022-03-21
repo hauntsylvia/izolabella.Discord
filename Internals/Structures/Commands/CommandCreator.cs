@@ -45,36 +45,6 @@ namespace izolabella.Discord.Internals.Structures.Commands
                             IsRequired = Param.IsRequired,
                             Type = Param.ParameterType,
                         };
-                        string? ParamDefaultName = Param.Default as string;
-                        if (Param.Default != null &&
-                            (Param.ParameterType == ApplicationCommandOptionType.Number ||
-                            Param.ParameterType == ApplicationCommandOptionType.Integer ||
-                            Param.ParameterType == ApplicationCommandOptionType.String))
-                        {
-                            if (Param.Default != null)
-                            {
-                                if (Param.Default.GetType() == typeof(string))
-                                {
-                                    Opt.AddChoice(ParamDefaultName, Param.Default as string);
-                                }
-                                else if (Param.Default.GetType() == typeof(int))
-                                {
-                                    Opt.AddChoice(ParamDefaultName, (int)Param.Default);
-                                }
-                                else if (Param.Default.GetType() == typeof(double))
-                                {
-                                    Opt.AddChoice(ParamDefaultName, (double)Param.Default);
-                                }
-                                else if (Param.Default.GetType() == typeof(long))
-                                {
-                                    Opt.AddChoice(ParamDefaultName, (long)Param.Default);
-                                }
-                                else if (Param.Default.GetType() == typeof(float))
-                                {
-                                    Opt.AddChoice(ParamDefaultName, (float)Param.Default);
-                                }
-                            }
-                        }
                         Options.Add(Opt);
                     }
                     SlashCommandBuilder SocketCommand = new()
