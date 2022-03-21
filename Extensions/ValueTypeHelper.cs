@@ -10,7 +10,7 @@ namespace izolabella.Discord.Extensions
     {
         public static bool IsNullable(this Type Ty)
         {
-            return Ty.IsValueType ? Activator.CreateInstance(Ty) == null : false;
+            return Ty.IsValueType && Activator.CreateInstance(Ty) == null;
         }
     }
 }
