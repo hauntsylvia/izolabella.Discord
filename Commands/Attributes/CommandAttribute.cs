@@ -56,6 +56,26 @@ namespace izolabella.Discord.Commands.Attributes
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="CommandAttribute"/> class.
+        /// </summary>
+        /// <param name="Tags">Tags to search for within the <see cref="SocketMessage.Content"/> property.</param>
+        /// <param name="Whitelist">The exclusive ids of Discord users to allow from invoking this command.</param>
+        /// <param name="Blacklist">The ids of Discord users to disallow from invoking this command.</param>
+        /// <param name="Description">Description of this command.</param>
+        /// <param name="Defer">If true, this indicates the command needs more than 3 seconds to respond to the interaction.
+        /// Also requires the attached method to use FollowUpAsync instead of RespondAsync to interactions.</param>
+        /// <param name="LocalOnly">If true, any responses will be sent to only the person who began the interaction.</param>
+        public CommandAttribute(string[] Tags, ulong[]? Whitelist, ulong[]? Blacklist, string? Description, bool Defer, bool LocalOnly)
+        {
+            this.Tags = Tags;
+            this.Whitelist = Whitelist;
+            this.Blacklist = Blacklist;
+            this.Description = Description;
+            this.Defer = Defer;
+            this.LocalOnly = LocalOnly;
+        }
+
+        /// <summary>
         /// Tags to use for this command.
         /// </summary>
         public string[] Tags { get; }

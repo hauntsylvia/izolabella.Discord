@@ -26,86 +26,128 @@ namespace izolabella.Discord.Internals.Structures.Commands
         /// </summary>
         public DiscordSocketClient Instance { get; }
 
-        /// <summary>
-        /// Creates commands.
-        /// </summary>
-        /// <param name="ToCreate">A <see cref="IReadOnlyCollection{CommandWrapper}"/> of <see cref="CommandWrapper"/> objects used to help 
-        /// the method create the commands on Discord.</param>
-        /// <returns></returns>
-        private async Task CreateCommands(IReadOnlyCollection<CommandWrapper> ToCreate)
+        private IReadOnlyDictionary<SocketGuild, List<SlashCommandBuilder>> CreateCommands(IReadOnlyCollection<CommandWrapper> ToCreate)
         {
-            try
+            Dictionary<SocketGuild, List<SlashCommandBuilder>> GuildAndCommands = new();
+            foreach (SocketGuild Guild in this.Instance.Guilds)
             {
-                foreach (SocketGuild Guild in this.Instance.Guilds)
+                GuildAndCommands.Add(Guild, new());
+                foreach (CommandWrapper Command in ToCreate)
                 {
-                    foreach (CommandWrapper Command in ToCreate)
+                    List<SlashCommandOptionBuilder> Options = new();
+                    IReadOnlyCollection<CommandParameter> Parameters = Command.GetCommandParameters();
+                    foreach (CommandParameter Param in Parameters)
                     {
-                        List<SlashCommandOptionBuilder> Options = new();
-                        IReadOnlyCollection<CommandParameter> Parameters = Command.GetCommandParameters();
-                        foreach (CommandParameter Param in Parameters)
+                        SlashCommandOptionBuilder Opt = new()
                         {
-                            Options.Add(new SlashCommandOptionBuilder()
-                            {
-                                Name = Param.Name,
-                                Description = Param.Description,
-                                IsRequired = Param.IsRequired,
-                                Type = Param.ParameterType,
-                            });
-                        }
-                        SlashCommandBuilder SocketCommand = new()
-                        {
-                            Name = Command.SlashCommandTag,
-                            Description = Command.Attribute.Description,
-                            IsDefaultPermission = true,
-                            Options = Options.Count > 0 ? Options : null
+                            Name = Param.Name,
+                            Description = Param.Description,
+                            IsRequired = Param.IsRequired,
+                            Type = Param.ParameterType,
                         };
-                        await Guild.CreateApplicationCommandAsync(SocketCommand.Build());
+                        string? ParamDefaultName = Param.Default as string;
+                        if (Param.Default != null &&
+                            (Param.ParameterType == ApplicationCommandOptionType.Number ||
+                            Param.ParameterType == ApplicationCommandOptionType.Integer ||
+                            Param.ParameterType == ApplicationCommandOptionType.String))
+                        {
+                            if (Param.Default != null)
+                            {
+                                if (Param.Default.GetType() == typeof(string))
+                                {
+                                    Opt.AddChoice(ParamDefaultName, Param.Default as string);
+                                }
+                                else if (Param.Default.GetType() == typeof(int))
+                                {
+                                    Opt.AddChoice(ParamDefaultName, (int)Param.Default);
+                                }
+                                else if (Param.Default.GetType() == typeof(double))
+                                {
+                                    Opt.AddChoice(ParamDefaultName, (double)Param.Default);
+                                }
+                                else if (Param.Default.GetType() == typeof(long))
+                                {
+                                    Opt.AddChoice(ParamDefaultName, (long)Param.Default);
+                                }
+                                else if (Param.Default.GetType() == typeof(float))
+                                {
+                                    Opt.AddChoice(ParamDefaultName, (float)Param.Default);
+                                }
+                            }
+                        }
+                        Options.Add(Opt);
                     }
+                    SlashCommandBuilder SocketCommand = new()
+                    {
+                        Name = Command.SlashCommandTag,
+                        Description = Command.Attribute.Description,
+                        IsDefaultPermission = true,
+                        Options = Options.Count > 0 ? Options : null,
+                    };
+                    GuildAndCommands[Guild].Add(SocketCommand);
                 }
             }
-            catch(Exception Ex)
-            {
-                Console.WriteLine(Ex);
-            }
+            return GuildAndCommands;
         }
 
         /// <summary>
-        /// Delete or modify existing commands.
         /// </summary>
-        /// <returns></returns>
-        public async Task UpdateCommands(IReadOnlyCollection<CommandWrapper> CurrentCommands)
+        /// <returns>A collection commands that need to be created per guild.</returns>
+        public async Task<IReadOnlyDictionary<SocketGuild, List<SlashCommandBuilder>>> FilterCommands(IReadOnlyCollection<CommandWrapper> Commands)
         {
-            foreach (SocketGuild Guild in this.Instance.Guilds)
+            Dictionary<SocketGuild, List<SlashCommandBuilder>> GuildAndCommands = new();
+            IReadOnlyDictionary<SocketGuild, List<SlashCommandBuilder>> CurrentCommands = this.CreateCommands(Commands);
+            foreach(KeyValuePair<SocketGuild, List<SlashCommandBuilder>> KeyValuePair in CurrentCommands)
             {
-                IReadOnlyCollection<SocketApplicationCommand> ExistingCommands = await Guild.GetApplicationCommandsAsync();
-                foreach (CommandWrapper Command in CurrentCommands)
+                GuildAndCommands.Add(KeyValuePair.Key, new List<SlashCommandBuilder>());
+                IReadOnlyCollection<SocketApplicationCommand> DiscordCommands = await KeyValuePair.Key.GetApplicationCommandsAsync();
+                foreach(SocketApplicationCommand DiscordCommandToCheck in DiscordCommands)
                 {
-                    SocketApplicationCommand? AlreadyExistingCommand = ExistingCommands.FirstOrDefault(ExistingCommand => ExistingCommand.Name == Command.SlashCommandTag);
-                    if (AlreadyExistingCommand != null)
+                    SlashCommandBuilder? PreDiscordCommandToCheck = null;
+                    foreach(SlashCommandBuilder PreDiscordCommand in KeyValuePair.Value)
                     {
-                        //bool NeedsUpdate = AlreadyExistingCommand.Name != Command.SlashCommandTag ||
-                        //    AlreadyExistingCommand.Description != Command.Attribute.Description ||
-                        //    AlreadyExistingCommand.Options.Count != Command.GetCommandParameters().Count;
-                        //if (NeedsUpdate)
-                        //{
-                        //    await AlreadyExistingCommand.DeleteAsync();
-                        //    await this.CreateCommands(new List<CommandWrapper>() { Command });
-                        //}
-                        await AlreadyExistingCommand.DeleteAsync();
-                        await this.CreateCommands(new List<CommandWrapper>() { Command });
+                        if(PreDiscordCommand.Name == DiscordCommandToCheck.Name)
+                        {
+                            PreDiscordCommandToCheck = PreDiscordCommand;
+                        }
                     }
-                    else
+                    if(PreDiscordCommandToCheck != null && SlashCommandComparer.NeedsUpdate(PreDiscordCommandToCheck, DiscordCommandToCheck))
                     {
-                        await this.CreateCommands(new List<CommandWrapper>() { Command });
+                        await DiscordCommandToCheck.DeleteAsync();
+                        GuildAndCommands[KeyValuePair.Key].Add(PreDiscordCommandToCheck);
                     }
                 }
-                if (ExistingCommands.Any(ExistingCommand => CurrentCommands.Any(CurrentCommand => ExistingCommand.Name != CurrentCommand.SlashCommandTag)))
+                foreach(SlashCommandBuilder PreDiscordCommand in KeyValuePair.Value)
                 {
-                    IEnumerable<SocketApplicationCommand> ForDeletion = ExistingCommands.Where(ExistingCommand => !CurrentCommands.Any(CurrentCommand => ExistingCommand.Name == CurrentCommand.SlashCommandTag));
-                    foreach (SocketApplicationCommand ToDelete in ForDeletion)
+                    SocketApplicationCommand? DiscordCommandExisting = null;
+                    foreach (SocketApplicationCommand DiscordCommandToCheck in DiscordCommands)
                     {
-                        await ToDelete.DeleteAsync();
+                        if (PreDiscordCommand.Name == DiscordCommandToCheck.Name)
+                        {
+                            DiscordCommandExisting = DiscordCommandToCheck;
+                        }
                     }
+                    if(DiscordCommandExisting == null)
+                    {
+                        GuildAndCommands[KeyValuePair.Key].Add(PreDiscordCommand);
+                    }
+                }
+            }
+            return GuildAndCommands;
+        }
+
+        /// <summary>
+        /// Finalize all commands and push them to all guilds in Discord.
+        /// </summary>
+        /// <param name="CommandsToFinalize"></param>
+        /// <returns></returns>
+        public static async Task FinalizeCommands(IReadOnlyDictionary<SocketGuild, List<SlashCommandBuilder>> CommandsToFinalize)
+        {
+            foreach (KeyValuePair<SocketGuild, List<SlashCommandBuilder>> KeyValuePair in CommandsToFinalize)
+            {
+                foreach (SlashCommandBuilder? Command in KeyValuePair.Value)
+                {
+                    await KeyValuePair.Key.CreateApplicationCommandAsync(Command.Build());
                 }
             }
         }

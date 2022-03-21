@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -6,13 +6,17 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>izolabella</Authors>
-	<Version>2.3.2</Version>
+	<Version>2.3.4</Version>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-	<PackageReleaseNotes>Added parameter support for the methods of commands.</PackageReleaseNotes>
+	<PackageReleaseNotes>
+		Fixed the properties of description and package release notes switching. Also added a new constructor for the defer and localonly properties in the command attribute.
+	</PackageReleaseNotes>
 	<RepositoryUrl>https://github.com/izolabella/izolabella.Discord</RepositoryUrl>
 	<RepositoryType>github</RepositoryType>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<Description>Fixed a bug where handling nullable primitive types wouldn't use its underlying type again, and worked on parameter ordering. Fixed IMentionable coming before the other interfaces.</Description>
+	<Description>
+		Command handling library for processing Discord slash commands with Discord.NET.
+	</Description>
   </PropertyGroup>
 
   <ItemGroup>

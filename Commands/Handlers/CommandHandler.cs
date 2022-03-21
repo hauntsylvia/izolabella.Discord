@@ -91,7 +91,8 @@ namespace izolabella.Discord.Commands.Handlers
         public async Task StartReceiving()
         {
             CommandCreator CommandCreator = new(this.Reference);
-            await CommandCreator.UpdateCommands(this.Commands);
+            IReadOnlyDictionary<SocketGuild, List<SlashCommandBuilder>> CommandsToCreate = await CommandCreator.FilterCommands(this.Commands);
+            await CommandCreator.FinalizeCommands(CommandsToCreate);
             this.Reference.SlashCommandExecuted += this.Reference_SlashCommandExecuted;
         }
 

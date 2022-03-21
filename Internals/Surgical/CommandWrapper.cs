@@ -44,28 +44,25 @@ namespace izolabella.Discord.Internals.Surgical
         /// <param name="Context">The message that invoked this command.</param>
         public void InvokeThis(SocketSlashCommand Context)
         {
-            try
+            object?[] ParamsObjs = new object[this.MethodInfo.GetParameters().Length];
+            ParamsObjs[0] = new CommandArguments(Context);
+            ParameterInfo[] MethodParams = this.MethodInfo.GetParameters();
+            for (int Index = 1; Index < MethodParams.Length; Index++)
             {
-                object[] ParamsObjs = new object[this.MethodInfo.GetParameters().Length];
-                ParamsObjs[0] = new CommandArguments(Context);
-                int CurrentIndexOfParameter = 1;
-                foreach (ParameterInfo ParameterOfMethod in this.MethodInfo.GetParameters())
+                ParameterInfo ParameterOfMethod = MethodParams[Index];
+                foreach (SocketSlashCommandDataOption Parameter in Context.Data.Options)
                 {
-                    foreach (SocketSlashCommandDataOption Parameter in Context.Data.Options)
+                    if (ParameterOfMethod.Name != null && Parameter.Name.ToLower() == ParameterOfMethod.Name.ToLower())
                     {
-                        if(ParameterOfMethod.Name != null && Parameter.Name.ToLower() == ParameterOfMethod.Name.ToLower())
-                        {
-                            ParamsObjs[CurrentIndexOfParameter] = Parameter.Value;
-                            CurrentIndexOfParameter++;
-                        }
+                        ParamsObjs[Index] = Parameter.Value;
                     }
                 }
-                this.MethodInfo.Invoke(this.Attribute, ParamsObjs);
+                if (ParamsObjs[Index] == null)
+                {
+                    ParamsObjs[Index] = ParameterOfMethod.RawDefaultValue;
+                }
             }
-            catch (Exception Ex)
-            {
-                Console.WriteLine(Ex);
-            }
+            this.MethodInfo.Invoke(this.Attribute, ParamsObjs);
         }
 
         /// <summary>
@@ -116,18 +113,10 @@ namespace izolabella.Discord.Internals.Surgical
                     if (ParamType != null && Param.Name != null)
                     {
                         bool IsNullable = Nullable.GetUnderlyingType(Param.ParameterType) != null || ValueTypeHelper.IsNullable(Param.ParameterType);
-                        bool IsRequired = false;
-                        if (!IsNullable)
-                        {
-                            IsRequired = true;
-                        }
-                        else if (IsNullable)
-                        {
-                            IsRequired = false;
-                        }
+                        bool IsRequired = !Param.HasDefaultValue && !IsNullable;
                         //bool IsRequired = !(ParameterType.IsValueType || Nullable.GetUnderlyingType(ParameterType) == null);
                         //bool IsRequired = !(Nullable.GetUnderlyingType(ParameterType) != null || !ParameterType.IsValueType);
-                        Params.Add(new(Param.Name, Param.Name, ParamType.Value, IsRequired));
+                       Params.Add(new(Param.Name, Param.Name, Param.RawDefaultValue, ParamType.Value, IsRequired));
                     }
                 }
             }

@@ -16,14 +16,16 @@ namespace izolabella.Discord.Internals.Structures.Commands
         /// </summary>
         /// <param name="Name">Name of the parameter.</param>
         /// <param name="Description">Description of the parameter.</param>
+        /// <param name="Default">The default value for this parameter.</param>
         /// <param name="ParameterType">The type of parameter.</param>
         /// <param name="IsRequired">Determines whether this parameter is required or optional.</param>
-        public CommandParameter(string Name, string Description, ApplicationCommandOptionType ParameterType, bool IsRequired)
+        public CommandParameter(string Name, string Description, object? Default, ApplicationCommandOptionType ParameterType, bool IsRequired)
         {
             this.name = Name;
             this.Description = Description;
+            this.Default = Default;
             this.ParameterType = ParameterType;
-            this.IsRequired = IsRequired;
+            this.IsRequired = ParameterType == ApplicationCommandOptionType.Boolean || IsRequired;
         }
 
         private readonly string name;
@@ -38,9 +40,15 @@ namespace izolabella.Discord.Internals.Structures.Commands
         public string Description { get; }
 
         /// <summary>
+        /// The default value for this parameter.
+        /// </summary>
+        public object? Default { get; }
+
+        /// <summary>
         /// The type of parameter.
         /// </summary>
         public ApplicationCommandOptionType ParameterType { get; }
+
         /// <summary>
         /// Whether this parameter is required or not.
         /// </summary>
