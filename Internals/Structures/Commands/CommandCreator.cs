@@ -57,7 +57,7 @@ namespace izolabella.Discord.Internals.Structures.Commands
                             Name = Command.SlashCommandTag,
                             Description = Command.Attribute.Description,
                             IsDefaultPermission = true,
-                            Options = Options
+                            Options = Options.Count > 0 ? Options : null
                         };
                         await Guild.CreateApplicationCommandAsync(SocketCommand.Build());
                     }
