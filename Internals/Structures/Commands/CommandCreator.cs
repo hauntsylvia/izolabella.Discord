@@ -126,7 +126,7 @@ namespace izolabella.Discord.Internals.Structures.Commands
                     {
                         await KeyValuePair.Key.CreateApplicationCommandAsync(Command.Build());
                     }
-                    catch(Exception Ex)
+                    catch
                     {
                     }
                 }

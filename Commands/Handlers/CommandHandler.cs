@@ -30,7 +30,7 @@ namespace izolabella.Discord.Commands.Handlers
         }
 
         /// <summary>
-        /// To allow or not to allow bots to interact be able to invoke the <see cref="CommandHandler.CommandInvoked"/> event and commands.
+        /// To allow or not to allow bots to interact be able to invoke the <see cref="CommandInvoked"/> event and commands.
         /// </summary>
         public bool AllowBotInteractions { get; set; }
 
