@@ -86,6 +86,11 @@ namespace izolabella.Discord.Internals.Structures.Commands
                         await DiscordCommandToCheck.DeleteAsync();
                         GuildAndCommands[KeyValuePair.Key].Add(PreDiscordCommandToCheck);
                     }
+
+                    if(KeyValuePair.Value.All(CommandHere => CommandHere.Name != DiscordCommandToCheck.Name))
+                    {
+                        await DiscordCommandToCheck.DeleteAsync();
+                    }
                 }
                 foreach(SlashCommandBuilder PreDiscordCommand in KeyValuePair.Value)
                 {
@@ -117,7 +122,13 @@ namespace izolabella.Discord.Internals.Structures.Commands
             {
                 foreach (SlashCommandBuilder? Command in KeyValuePair.Value)
                 {
-                    await KeyValuePair.Key.CreateApplicationCommandAsync(Command.Build());
+                    try
+                    {
+                        await KeyValuePair.Key.CreateApplicationCommandAsync(Command.Build());
+                    }
+                    catch(Exception Ex)
+                    {
+                    }
                 }
             }
         }

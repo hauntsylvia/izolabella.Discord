@@ -6,12 +6,10 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>izolabella</Authors>
-	<Version>3.0.0</Version>
+	<Version>3.0.1</Version>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<PackageReleaseNotes>
-		Added checking for when it is appropriate to update a slash command rather than every time on startup.
-		Updated internal systems for validating commands.
-		Lots of spaghetti code, somewhat ashamed.
+		Rolled back the choices due to lack of readiness to fix some stuff.
 	</PackageReleaseNotes>
 	<RepositoryUrl>https://github.com/izolabella/izolabella.Discord</RepositoryUrl>
 	<RepositoryType>github</RepositoryType>
