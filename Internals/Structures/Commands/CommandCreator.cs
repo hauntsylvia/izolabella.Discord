@@ -44,6 +44,7 @@ namespace izolabella.Discord.Internals.Structures.Commands
                             Description = Param.Description,
                             IsRequired = Param.IsRequired,
                             Type = Param.ParameterType,
+                            Choices = Param.Choices
                         };
                         Options.Add(Opt);
                     }

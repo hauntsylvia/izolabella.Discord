@@ -116,11 +116,17 @@ namespace izolabella.Discord.Internals.Surgical
                     }
                     if (ParamType != null && Param.Name != null)
                     {
-                        bool IsNullable = Nullable.GetUnderlyingType(Param.ParameterType) != null || ValueTypeHelper.IsNullable(Param.ParameterType);
-                        bool IsRequired = !Param.HasDefaultValue && !IsNullable;
-                        //bool IsRequired = !(ParameterType.IsValueType || Nullable.GetUnderlyingType(ParameterType) == null);
-                        //bool IsRequired = !(Nullable.GetUnderlyingType(ParameterType) != null || !ParameterType.IsValueType);
-                       Params.Add(new(Param.Name, Param.Name, UnderlyingOrRealType.IsEnum ? UnderlyingOrRealType.GetEnumValues().Cast<string>().ToArray() : null, ParamType.Value, IsRequired));
+                        try
+                        {
+                            bool IsNullable = Nullable.GetUnderlyingType(Param.ParameterType) != null || ValueTypeHelper.IsNullable(Param.ParameterType);
+                            bool IsRequired = !Param.HasDefaultValue && !IsNullable;
+                            Params.Add(new(Param.Name, Param.Name, UnderlyingOrRealType.IsEnum ? (string[])Enum.GetValues(UnderlyingOrRealType) : null, ParamType.Value, IsRequired));
+                        }
+                        catch(Exception Ex)
+                        {
+                            Console.WriteLine(Ex);
+                            throw;
+                        }
                     }
                 }
             }

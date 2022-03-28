@@ -23,7 +23,7 @@ namespace izolabella.Discord.Internals.Structures.Commands
         {
             this.name = Name;
             this.Description = Description;
-            this.Choices = Choices;
+            this.choices = Choices;
             this.ParameterType = ParameterType;
             this.IsRequired = ParameterType == ApplicationCommandOptionType.Boolean || IsRequired;
         }
@@ -39,10 +39,29 @@ namespace izolabella.Discord.Internals.Structures.Commands
         /// </summary>
         public string Description { get; }
 
+        private readonly string[]? choices;
         /// <summary>
         /// The choices for this parameter.
         /// </summary>
-        public string[]? Choices { get; }
+        public List<ApplicationCommandOptionChoiceProperties> Choices
+        {
+            get
+            {
+                List<ApplicationCommandOptionChoiceProperties> List = new();
+                if(this.choices != null)
+                {
+                    foreach (string C in this.choices)
+                    {
+                        List.Add(new()
+                        {
+                            Name = C,
+                            Value = C
+                        });
+                    }
+                }
+                return List;
+            }
+        }
 
         /// <summary>
         /// The type of parameter.
