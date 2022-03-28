@@ -54,7 +54,17 @@ namespace izolabella.Discord.Internals.Surgical
                 {
                     if (ParameterOfMethod.Name != null && Parameter.Name.ToLower() == ParameterOfMethod.Name.ToLower())
                     {
-                        ParamsObjs[Index] = Parameter.Value;
+                        if(ParameterOfMethod.ParameterType.IsEnum)
+                        {
+                            if(Enum.TryParse(ParameterOfMethod.ParameterType, Parameter.Value.ToString(), out object? EnumFin))
+                            {
+                                ParamsObjs[Index] = EnumFin;
+                            }
+                        }
+                        else
+                        {
+                            ParamsObjs[Index] = Parameter.Value;
+                        }
                     }
                 }
                 if (ParamsObjs[Index] == null)
@@ -120,7 +130,7 @@ namespace izolabella.Discord.Internals.Surgical
                         {
                             bool IsNullable = Nullable.GetUnderlyingType(Param.ParameterType) != null || ValueTypeHelper.IsNullable(Param.ParameterType);
                             bool IsRequired = !Param.HasDefaultValue && !IsNullable;
-                            Params.Add(new(Param.Name, Param.Name, UnderlyingOrRealType.IsEnum ? (string[])Enum.GetValues(UnderlyingOrRealType) : null, ParamType.Value, IsRequired));
+                            Params.Add(new(Param.Name, Param.Name, UnderlyingOrRealType.IsEnum ? Enum.GetNames(UnderlyingOrRealType) : null, ParamType.Value, IsRequired));
                         }
                         catch(Exception Ex)
                         {

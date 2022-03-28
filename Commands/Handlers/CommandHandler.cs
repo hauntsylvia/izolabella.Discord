@@ -88,6 +88,10 @@ namespace izolabella.Discord.Commands.Handlers
         /// Makes the instance start receiving and handling messages.
         /// </summary>
         /// <returns></returns>
+        /// <remarks>
+        ///     This will invoke the <see cref="CommandCreator.FinalizeCommands(IReadOnlyDictionary{SocketGuild, List{SlashCommandBuilder}})"/>
+        ///     method.
+        /// </remarks>
         public async Task StartReceiving()
         {
             CommandCreator CommandCreator = new(this.Reference);
