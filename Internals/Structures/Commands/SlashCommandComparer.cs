@@ -65,11 +65,11 @@ namespace izolabella.Discord.Internals.Structures.Commands
 
         internal static bool ParameterNeedsUpdate(SlashCommandOptionBuilder RecentOption, SocketApplicationCommandOption DiscordOption)
         {
-            return RecentOption.IsRequired == DiscordOption.IsRequired || 
-                RecentOption.Name == DiscordOption.Name ||
-                RecentOption.IsAutocomplete == DiscordOption.IsAutocomplete ||
-                RecentOption.Description == DiscordOption.Description ||
-                (RecentOption.IsDefault ?? false);
+            return RecentOption.IsRequired != DiscordOption.IsRequired || 
+                RecentOption.Name != DiscordOption.Name ||
+                RecentOption.IsAutocomplete != DiscordOption.IsAutocomplete ||
+                RecentOption.Description != DiscordOption.Description ||
+                (RecentOption.IsDefault ?? false) != (DiscordOption.IsDefault ?? false);
             //foreach (PropertyInfo PropertyOfRecentOption in RecentOption.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             //{
             //    foreach (PropertyInfo PropertyOfExistingOption in DiscordOption.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))

@@ -110,13 +110,17 @@ namespace izolabella.Discord.Internals.Surgical
                     {
                         ParamType = ApplicationCommandOptionType.Mentionable;
                     }
+                    else if (UnderlyingOrRealType.IsEnum)
+                    {
+                        ParamType = ApplicationCommandOptionType.String;
+                    }
                     if (ParamType != null && Param.Name != null)
                     {
                         bool IsNullable = Nullable.GetUnderlyingType(Param.ParameterType) != null || ValueTypeHelper.IsNullable(Param.ParameterType);
                         bool IsRequired = !Param.HasDefaultValue && !IsNullable;
                         //bool IsRequired = !(ParameterType.IsValueType || Nullable.GetUnderlyingType(ParameterType) == null);
                         //bool IsRequired = !(Nullable.GetUnderlyingType(ParameterType) != null || !ParameterType.IsValueType);
-                       Params.Add(new(Param.Name, Param.Name, Param.RawDefaultValue, ParamType.Value, IsRequired));
+                       Params.Add(new(Param.Name, Param.Name, UnderlyingOrRealType.IsEnum ? UnderlyingOrRealType.GetEnumValues().Cast<string>().ToArray() : null, ParamType.Value, IsRequired));
                     }
                 }
             }
