@@ -98,7 +98,7 @@ namespace izolabella.Discord.Internals.Structures.Commands
                     SocketApplicationCommand? DiscordCommandExisting = null;
                     foreach (SocketApplicationCommand DiscordCommandToCheck in DiscordCommands)
                     {
-                        if (PreDiscordCommand.Name == DiscordCommandToCheck.Name)
+                        if (PreDiscordCommand.Name == DiscordCommandToCheck.Name && PreDiscordCommand.Description == DiscordCommandToCheck.Description)
                         {
                             DiscordCommandExisting = DiscordCommandToCheck;
                         }

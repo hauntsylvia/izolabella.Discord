@@ -63,7 +63,7 @@ namespace izolabella.Discord.Internals.Surgical
                         }
                         else
                         {
-                            ParamsObjs[Index] = Parameter.Value;
+                            ParamsObjs[Index] = Parameter.Value.GetType() == typeof(long) && ParameterOfMethod.ParameterType == typeof(int) ? Convert.ToInt32(Parameter.Value) : Parameter.Value;
                         }
                     }
                 }
@@ -72,7 +72,14 @@ namespace izolabella.Discord.Internals.Surgical
                     ParamsObjs[Index] = ParameterOfMethod.RawDefaultValue;
                 }
             }
-            this.MethodInfo.Invoke(this.Attribute, ParamsObjs);
+            try
+            {
+                this.MethodInfo.Invoke(this.Attribute, ParamsObjs);
+            }
+            catch(Exception Ex)
+            {
+                Console.WriteLine(Ex);
+            }
         }
 
         /// <summary>
