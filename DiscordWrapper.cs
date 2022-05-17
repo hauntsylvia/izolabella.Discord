@@ -1,9 +1,7 @@
-﻿global using Discord.API;
+﻿global using Discord;
 global using Discord.Net;
 global using Discord.WebSocket;
-global using Discord;
 global using izolabella.ConsoleHelper;
-
 using izolabella.Discord.Commands.Handlers;
 
 namespace izolabella.Discord

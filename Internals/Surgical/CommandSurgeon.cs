@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace izolabella.Discord.Internals.Surgical
 {
-    static class CommandSurgeon
+    internal static class CommandSurgeon
     {
         private static IReadOnlyCollection<MethodInfo> GetSupportedMethods()
         {
@@ -27,7 +27,7 @@ namespace izolabella.Discord.Internals.Surgical
         {
             List<CommandWrapper> Commands = new();
             IReadOnlyCollection<MethodInfo> Methods = GetSupportedMethods();
-            foreach(MethodInfo Method in Methods)
+            foreach (MethodInfo Method in Methods)
             {
                 CommandAttribute? CommandAttribute = Method.GetCustomAttribute<CommandAttribute>();
                 if (CommandAttribute != null)

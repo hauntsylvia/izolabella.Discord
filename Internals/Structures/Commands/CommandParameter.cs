@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace izolabella.Discord.Internals.Structures.Commands
+﻿namespace izolabella.Discord.Internals.Structures.Commands
 {
     /// <summary>
     /// A Discord parameter class.
@@ -48,7 +42,7 @@ namespace izolabella.Discord.Internals.Structures.Commands
             get
             {
                 List<ApplicationCommandOptionChoiceProperties> List = new();
-                if(this.choices != null)
+                if (this.choices != null)
                 {
                     foreach (string C in this.choices)
                     {

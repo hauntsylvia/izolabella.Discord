@@ -1,9 +1,4 @@
 ﻿using izolabella.Discord.Internals.Surgical;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace izolabella.Discord.Internals.Structures.Commands
 {
@@ -68,32 +63,32 @@ namespace izolabella.Discord.Internals.Structures.Commands
         {
             Dictionary<SocketGuild, List<SlashCommandBuilder>> GuildAndCommands = new();
             IReadOnlyDictionary<SocketGuild, List<SlashCommandBuilder>> CurrentCommands = this.CreateCommands(Commands);
-            foreach(KeyValuePair<SocketGuild, List<SlashCommandBuilder>> KeyValuePair in CurrentCommands)
+            foreach (KeyValuePair<SocketGuild, List<SlashCommandBuilder>> KeyValuePair in CurrentCommands)
             {
                 GuildAndCommands.Add(KeyValuePair.Key, new List<SlashCommandBuilder>());
                 IReadOnlyCollection<SocketApplicationCommand> DiscordCommands = await KeyValuePair.Key.GetApplicationCommandsAsync();
-                foreach(SocketApplicationCommand DiscordCommandToCheck in DiscordCommands)
+                foreach (SocketApplicationCommand DiscordCommandToCheck in DiscordCommands)
                 {
                     SlashCommandBuilder? PreDiscordCommandToCheck = null;
-                    foreach(SlashCommandBuilder PreDiscordCommand in KeyValuePair.Value)
+                    foreach (SlashCommandBuilder PreDiscordCommand in KeyValuePair.Value)
                     {
-                        if(PreDiscordCommand.Name == DiscordCommandToCheck.Name)
+                        if (PreDiscordCommand.Name == DiscordCommandToCheck.Name)
                         {
                             PreDiscordCommandToCheck = PreDiscordCommand;
                         }
                     }
-                    if(PreDiscordCommandToCheck != null && SlashCommandComparer.NeedsUpdate(PreDiscordCommandToCheck, DiscordCommandToCheck))
+                    if (PreDiscordCommandToCheck != null && SlashCommandComparer.NeedsUpdate(PreDiscordCommandToCheck, DiscordCommandToCheck))
                     {
                         await DiscordCommandToCheck.DeleteAsync();
                         GuildAndCommands[KeyValuePair.Key].Add(PreDiscordCommandToCheck);
                     }
 
-                    if(KeyValuePair.Value.All(CommandHere => CommandHere.Name != DiscordCommandToCheck.Name))
+                    if (KeyValuePair.Value.All(CommandHere => CommandHere.Name != DiscordCommandToCheck.Name))
                     {
                         await DiscordCommandToCheck.DeleteAsync();
                     }
                 }
-                foreach(SlashCommandBuilder PreDiscordCommand in KeyValuePair.Value)
+                foreach (SlashCommandBuilder PreDiscordCommand in KeyValuePair.Value)
                 {
                     SocketApplicationCommand? DiscordCommandExisting = null;
                     foreach (SocketApplicationCommand DiscordCommandToCheck in DiscordCommands)
@@ -103,7 +98,7 @@ namespace izolabella.Discord.Internals.Structures.Commands
                             DiscordCommandExisting = DiscordCommandToCheck;
                         }
                     }
-                    if(DiscordCommandExisting == null)
+                    if (DiscordCommandExisting == null)
                     {
                         GuildAndCommands[KeyValuePair.Key].Add(PreDiscordCommand);
                     }
@@ -127,7 +122,7 @@ namespace izolabella.Discord.Internals.Structures.Commands
                     {
                         await KeyValuePair.Key.CreateApplicationCommandAsync(Command.Build());
                     }
-                    catch(HttpException Ex)
+                    catch (HttpException Ex)
                     {
                         Console.WriteLine(Ex);
                     }

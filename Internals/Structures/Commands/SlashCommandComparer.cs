@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 
 namespace izolabella.Discord.Internals.Structures.Commands
 {
@@ -15,11 +10,11 @@ namespace izolabella.Discord.Internals.Structures.Commands
             {
                 int SlashCommandOptionsCount = SlashCommandBuilder.Options?.Count ?? 0;
                 int AppCommandOptionsCount = AppCommand.Options?.Count ?? 0;
-                if(SlashCommandOptionsCount != AppCommandOptionsCount)
+                if (SlashCommandOptionsCount != AppCommandOptionsCount)
                 {
                     return true;
                 }
-                else if(SlashCommandBuilder.Options != null && AppCommand.Options != null)
+                else if (SlashCommandBuilder.Options != null && AppCommand.Options != null)
                 {
                     for (int Index = 0; Index < SlashCommandBuilder.Options.Count; Index++)
                     {
@@ -40,7 +35,7 @@ namespace izolabella.Discord.Internals.Structures.Commands
                 {
                     PropertyInfo RecentCommand = PropertyInfoOfSlashCommandBuilder[Index];
                     PropertyInfo[] PropertyInfoOfDiscordCommand = AppCommand.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                    if(PropertyInfoOfDiscordCommand.Length > Index)
+                    if (PropertyInfoOfDiscordCommand.Length > Index)
                     {
                         PropertyInfo ExistingCommand = PropertyInfoOfDiscordCommand[Index];
                         if (RecentCommand.Name == ExistingCommand.Name)
@@ -65,7 +60,7 @@ namespace izolabella.Discord.Internals.Structures.Commands
 
         internal static bool ParameterNeedsUpdate(SlashCommandOptionBuilder RecentOption, SocketApplicationCommandOption DiscordOption)
         {
-            return RecentOption.IsRequired != DiscordOption.IsRequired || 
+            return RecentOption.IsRequired != DiscordOption.IsRequired ||
                 RecentOption.Name != DiscordOption.Name ||
                 RecentOption.IsAutocomplete != DiscordOption.IsAutocomplete ||
                 RecentOption.Description != DiscordOption.Description ||

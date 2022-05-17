@@ -1,13 +1,7 @@
 ﻿using izolabella.Discord.Commands.Arguments;
 using izolabella.Discord.Commands.Attributes;
-using izolabella.Discord.Internals.Surgical;
-using izolabella.ConsoleHelper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using izolabella.Discord.Internals.Structures.Commands;
+using izolabella.Discord.Internals.Surgical;
 
 namespace izolabella.Discord.Commands.Handlers
 {

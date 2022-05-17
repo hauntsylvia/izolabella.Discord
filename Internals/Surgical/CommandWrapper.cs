@@ -1,13 +1,8 @@
 ﻿using izolabella.Discord.Commands.Arguments;
 using izolabella.Discord.Commands.Attributes;
-using izolabella.Discord.Internals.Structures.Commands;
 using izolabella.Discord.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using izolabella.Discord.Internals.Structures.Commands;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace izolabella.Discord.Internals.Surgical
 {
@@ -54,9 +49,9 @@ namespace izolabella.Discord.Internals.Surgical
                 {
                     if (ParameterOfMethod.Name != null && Parameter.Name.ToLower() == ParameterOfMethod.Name.ToLower())
                     {
-                        if(ParameterOfMethod.ParameterType.IsEnum)
+                        if (ParameterOfMethod.ParameterType.IsEnum)
                         {
-                            if(Enum.TryParse(ParameterOfMethod.ParameterType, Parameter.Value.ToString(), out object? EnumFin))
+                            if (Enum.TryParse(ParameterOfMethod.ParameterType, Parameter.Value.ToString(), out object? EnumFin))
                             {
                                 ParamsObjs[Index] = EnumFin;
                             }
@@ -76,7 +71,7 @@ namespace izolabella.Discord.Internals.Surgical
             {
                 this.MethodInfo.Invoke(this.Attribute, ParamsObjs);
             }
-            catch(Exception Ex)
+            catch (Exception Ex)
             {
                 Console.WriteLine(Ex);
             }
@@ -89,11 +84,11 @@ namespace izolabella.Discord.Internals.Surgical
         public IReadOnlyCollection<CommandParameter> GetCommandParameters()
         {
             List<CommandParameter> Params = new();
-            foreach(ParameterInfo Param in this.MethodInfo.GetParameters())
+            foreach (ParameterInfo Param in this.MethodInfo.GetParameters())
             {
                 ApplicationCommandOptionType? ParamType = null;
                 Type UnderlyingOrRealType = Nullable.GetUnderlyingType(Param.ParameterType) ?? Param.ParameterType;
-                if(UnderlyingOrRealType != null)
+                if (UnderlyingOrRealType != null)
                 {
                     if (UnderlyingOrRealType == typeof(bool))
                     {
@@ -139,7 +134,7 @@ namespace izolabella.Discord.Internals.Surgical
                             bool IsRequired = !Param.HasDefaultValue && !IsNullable;
                             Params.Add(new(Param.Name, Param.Name, UnderlyingOrRealType.IsEnum ? Enum.GetNames(UnderlyingOrRealType) : null, ParamType.Value, IsRequired));
                         }
-                        catch(Exception Ex)
+                        catch (Exception Ex)
                         {
                             Console.WriteLine(Ex);
                             throw;

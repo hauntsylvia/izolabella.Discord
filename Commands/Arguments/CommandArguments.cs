@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace izolabella.Discord.Commands.Arguments
+﻿namespace izolabella.Discord.Commands.Arguments
 {
     /// <summary>
     /// A class containing information used to pass along to the methods of commands.
