@@ -43,3 +43,8 @@ namespace MyDiscordBot.Commands
     }
 }
 ```
+
+To get things going, call the following method on the `IzolabellaDiscordCommandClient` instance you have created:
+```cs
+await Client.StartAsync("Token");
+```
