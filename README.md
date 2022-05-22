@@ -49,4 +49,4 @@ To get things going, call the following method on the `IzolabellaDiscordCommandC
 await Client.StartAsync("Token");
 ```
 
-__I want to make this as useable as possible for you. I have no in-depth documentation since things are currently changing rapidly. For questions and how-tos, please send me a request on Discord at `izolabella.bin#0216`.
+__I want to make this as useable as possible for you. I have no in-depth documentation since things are currently changing rapidly. For questions and how-tos, please send me a request on Discord at `izolabella.bin#0216`.__
