@@ -16,10 +16,6 @@ namespace izolabella.Discord.Internals.Surgical
                     foreach (MethodInfo Method in AllMethodsInType)
                     {
                         Methods.Add(Method);
-                        if (Method.Name.ToLower() == "me")
-                        {
-                            Console.Write("A");
-                        }
                     }
                 }
             }
