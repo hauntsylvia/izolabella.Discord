@@ -43,37 +43,8 @@ namespace izolabella.Discord.Objects.Clients
         {
             this.Client.Ready += async () =>
             {
-                try
-                {
-                    foreach (SocketGuild Guild in this.Client.Guilds)
-                    {
-                        foreach (IIzolabellaCommand Command in this.Commands)
-                        {
-                            List<SlashCommandOptionBuilder> Options = new();
-                            foreach (IzolabellaCommandParameter Param in Command.Parameters)
-                            {
-                                Options.Add(new()
-                                {
-                                    Name = NameConformer.DiscordCommandConformity(Param.Name),
-                                    Description = Param.Description,
-                                    IsRequired = Param.IsRequired,
-                                    Type = Param.OptionType
-                                });
-                            }
-                            SlashCommandBuilder SlashCommandBuilder = new()
-                            {
-                                Name = NameConformer.DiscordCommandConformity(Command.Name),
-                                Description = Command.Description,
-                                Options = Options
-                            };
-                            await Guild.CreateApplicationCommandAsync(SlashCommandBuilder.Build());
-                        }
-                    }
-                }
-                catch (Exception Ex)
-                {
-                    Console.WriteLine(Ex);
-                }
+                await this.GetRidOfEmptyCommands();
+                await this.RegisterCommands();
             };
             this.Client.SlashCommandExecuted += async (PassedCommand) =>
             {
@@ -92,7 +63,52 @@ namespace izolabella.Discord.Objects.Clients
             await this.Client.LoginAsync(TokenType.Bot, Token, true);
             await this.Client.StartAsync();
         }
-   
+
+        internal async Task RegisterCommands()
+        {
+            foreach (SocketGuild Guild in this.Client.Guilds)
+            {
+                foreach (IIzolabellaCommand Command in this.Commands)
+                {
+                    List<SlashCommandOptionBuilder> Options = new();
+                    foreach (IzolabellaCommandParameter Param in Command.Parameters)
+                    {
+                        Options.Add(new()
+                        {
+                            Name = NameConformer.DiscordCommandConformity(Param.Name),
+                            Description = Param.Description,
+                            IsRequired = Param.IsRequired,
+                            Type = Param.OptionType
+                        });
+                    }
+                    SlashCommandBuilder SlashCommandBuilder = new()
+                    {
+                        Name = NameConformer.DiscordCommandConformity(Command.Name),
+                        Description = Command.Description,
+                        Options = Options
+                    };
+                    await Guild.CreateApplicationCommandAsync(SlashCommandBuilder.Build());
+                }
+            }
+        }
+
+        internal async Task GetRidOfEmptyCommands()
+        {
+            foreach(SocketGuild G in this.Client.Guilds)
+            {
+                foreach (SocketApplicationCommand Command in await G.GetApplicationCommandsAsync())
+                { 
+                    if(Command.ApplicationId == this.Client.CurrentUser.Id)
+                    {
+                        if(!this.Commands.Any(C => NameConformer.DiscordCommandConformity(C.Name) == Command.Name))
+                        {
+                            await Command.DeleteAsync();
+                        }
+                    }
+                }
+            }
+        }
+
         internal static List<IIzolabellaCommand> GetIzolabellaCommands()
         {
             List<IIzolabellaCommand> Commands = new();
