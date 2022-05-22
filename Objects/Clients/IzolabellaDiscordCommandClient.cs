@@ -3,6 +3,7 @@ global using Discord.Net;
 global using Discord.WebSocket;
 global using izolabella.ConsoleHelper;
 using izolabella.Discord.Objects.Interfaces;
+using izolabella.Discord.Objects.Parameters;
 using izolabella.Discord.Objects.Util;
 using System.Reflection;
 
@@ -40,23 +41,52 @@ namespace izolabella.Discord.Objects.Clients
         /// <returns></returns>
         public async Task StartAsync(string Token)
         {
+            this.Client.Ready += async () =>
+            {
+                try
+                {
+                    foreach (SocketGuild Guild in this.Client.Guilds)
+                    {
+                        foreach (IIzolabellaCommand Command in this.Commands)
+                        {
+                            List<SlashCommandOptionBuilder> Options = new();
+                            foreach (IzolabellaCommandParameter Param in Command.Parameters)
+                            {
+                                Options.Add(new()
+                                {
+                                    Name = NameConformer.DiscordCommandConformity(Param.Name),
+                                    Description = Param.Description,
+                                    IsRequired = Param.IsRequired,
+                                    Type = Param.OptionType
+                                });
+                            }
+                            SlashCommandBuilder SlashCommandBuilder = new()
+                            {
+                                Name = NameConformer.DiscordCommandConformity(Command.Name),
+                                Description = Command.Description,
+                                Options = Options
+                            };
+                            await Guild.CreateApplicationCommandAsync(SlashCommandBuilder.Build());
+                        }
+                    }
+                }
+                catch (Exception Ex)
+                {
+                    Console.WriteLine(Ex);
+                }
+            };
             this.Client.SlashCommandExecuted += async (PassedCommand) =>
             {
                 IIzolabellaCommand? Command = this.Commands.FirstOrDefault(
                     Iz => NameConformer.DiscordCommandConformity(Iz.Name) == NameConformer.DiscordCommandConformity(PassedCommand.CommandName));
                 if(Command != null)
                 {
-                    Type CommandType = Command.GetType();
-                    List<object?> SentParameters = new();
+                    List<IzolabellaCommandArgument> SentParameters = new();
                     foreach(SocketSlashCommandDataOption Argument in PassedCommand.Data.Options)
                     {
-                        SentParameters.Add(Argument.Value);
+                        SentParameters.Add(new(Argument.Name, "", Argument.Type, true, Argument.Value));
                     }
-                    object? Instance = Activator.CreateInstance(CommandType, SentParameters.ToArray());
-                    if(Instance != null && Instance is IIzolabellaCommand IzCommand)
-                    {
-                        await IzCommand.RunAsync(new(PassedCommand));
-                    }
+                    await Command.RunAsync(new(PassedCommand), SentParameters.ToArray());
                 }
             };
             await this.Client.LoginAsync(TokenType.Bot, Token, true);
@@ -70,7 +100,7 @@ namespace izolabella.Discord.Objects.Clients
             {
                 foreach(Type T in Ass.GetTypes())
                 {
-                    if(T.IsAssignableFrom(typeof(IIzolabellaCommand)) && !T.IsInterface)
+                    if(typeof(IIzolabellaCommand).IsAssignableFrom(T) && !T.IsInterface)
                     {
                         object? Instance = Activator.CreateInstance(T);
                         if(Instance != null && Instance is IIzolabellaCommand I)

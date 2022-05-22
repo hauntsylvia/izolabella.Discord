@@ -16,30 +16,30 @@ dotnet add package izolabella.Discord
 This project uses [Discord.NET](https://www.nuget.org/packages/Discord.Net/) to function!*
 
 # ⌨️ Code
-A new instance of the `DiscordWrapper` class must be initialized.
+A new instance of the `IzolabellaDiscordCommandClient` class must be initialized.
 ```cs
-DiscordSocketClient DiscordNETClient = new DiscordSocketClient();
-DiscordWrapper DiscordWrapper = new DiscordWrapper(DiscordNETClient);
+IzolabellaDiscordCommandClient Client = new(new DiscordSocketConfig());
 ```
 
-The `DiscordWrapper` class has a property (`CommandHandler`) that allows for other optional configurations for message pre-validation, such as whether to allow bots
-to interact with the `CommandHandler` or not.
-```cs
-DiscordWrapper.CommandHandler.AllowBotInteractions = false;
-```
-
-To mark a method as a command, the `CommandAttribute` attribute should be attached to a method with a `CommandArguments` parameter. Other parameters may be provided as `Option`s in Discord. [Read more](https://discord.com/developers/docs/interactions/application-commands) about slash command options.
+The current version of this library uses classes for commands. To create a command, create a class that inherits the interface `IIzolabellaCommand`.
 ```cs
 namespace MyDiscordBot.Commands
 {
-    public class Example
+    public class MyCommand : IIzolabellaCommand
     {
-        [CommandAttribute(new string[] { "slash-command", }, "Description of my slash command.)]
-        public static void ExampleCommand(CommandArguments Args, double FirstParameter, string? SecondOptionalParameter)
+        public string Name => "Command";
+
+        public string Description => "Description of command goes here.";
+
+        public IzolabellaCommandParameter[] Parameters => new[]
         {
-            Console.Out.WriteLine(Args.User.UserName + $" has fired this command with the following parameters:\n{FirstParameter}, {(SecondOptionalParameter ?? "[no second param]")}");
+            new IzolabellaCommandParameter("Param", "This is my parameter!", ApplicationCommandOptionType.Channel, true)
+        };
+
+        public Task RunAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments)
+        {
+            // command runs here!
         }
     }
 }
 ```
-**Once the above is accomplished, call the `DiscordWrapper.StartReceiving()` method to allow the handler to begin processing your commands.**
