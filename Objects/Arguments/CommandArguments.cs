@@ -1,21 +1,21 @@
-﻿namespace izolabella.Discord.Commands.Arguments
+﻿namespace izolabella.Discord.Objects.Arguments
 {
     /// <summary>
     /// A class containing information used to pass along to the methods of commands.
     /// </summary>
-    public class CommandArguments
+    public class CommandContext
     {
         /// <summary>
         /// A class containing information used to pass along to the methods of commands.
         /// </summary>
-        public CommandArguments(SocketSlashCommand SlashCommand)
+        public CommandContext(SocketSlashCommand SlashCommand)
         {
-            this.SlashCommand = SlashCommand;
+            this.UserContext = SlashCommand;
         }
 
         /// <summary>
         /// The command context.
         /// </summary>
-        public SocketSlashCommand SlashCommand { get; }
+        public SocketSlashCommand UserContext { get; }
     }
 }

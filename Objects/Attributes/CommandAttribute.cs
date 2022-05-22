@@ -1,12 +1,12 @@
-﻿using izolabella.Discord.Commands.Arguments;
+﻿using izolabella.Discord.Objects.Arguments;
 
-namespace izolabella.Discord.Commands.Attributes
+namespace izolabella.Discord.Objects.Attributes
 {
     /// <summary>
     /// An attribute used to specify that a method can be invoked for a command.
     /// </summary>
     /// <remarks>
-    /// Methods should include a <see cref="CommandArguments"/> parameter.
+    /// Methods should include a <see cref="CommandContext"/> parameter.
     /// </remarks>
     [AttributeUsage(AttributeTargets.Method)]
     public class CommandAttribute : Attribute
