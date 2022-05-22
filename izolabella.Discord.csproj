@@ -6,10 +6,10 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>izolabella</Authors>
-	<Version>4.0.0</Version>
+	<Version>4.1.0</Version>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<PackageReleaseNotes>
-	    Added enum support for command parameters.
+	    Fixed some cross-ref assembly issues.
 	</PackageReleaseNotes>
 	<RepositoryUrl>https://github.com/izolabella/izolabella.Discord</RepositoryUrl>
 	<RepositoryType>github</RepositoryType>
@@ -20,11 +20,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Net" Version="3.4.1" />
-    <PackageReference Include="Discord.Net.Core" Version="3.4.1" />
-    <PackageReference Include="Discord.Net.Rest" Version="3.4.1" />
-    <PackageReference Include="Discord.Net.Webhook" Version="3.4.1" />
-    <PackageReference Include="Discord.Net.WebSocket" Version="3.4.1" />
+    <PackageReference Include="Discord.Net" Version="3.6.1" />
+    <PackageReference Include="Discord.Net.Core" Version="3.6.1" />
+    <PackageReference Include="Discord.Net.Rest" Version="3.6.1" />
+    <PackageReference Include="Discord.Net.Webhook" Version="3.6.1" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="3.6.1" />
     <PackageReference Include="izolabella.PrettyConsole" Version="1.1.0" />
   </ItemGroup>
 

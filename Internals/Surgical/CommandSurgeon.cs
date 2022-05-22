@@ -8,15 +8,18 @@ namespace izolabella.Discord.Internals.Surgical
         private static IReadOnlyCollection<MethodInfo> GetSupportedMethods()
         {
             List<MethodInfo> Methods = new();
-            Assembly? Assembly = Assembly.GetEntryAssembly();
-            if (Assembly != null)
+            foreach(Assembly A in AppDomain.CurrentDomain.GetAssemblies())
             {
-                foreach (Type Type in Assembly.GetTypes())
+                foreach (Type Type in A.GetTypes())
                 {
                     MethodInfo[] AllMethodsInType = Type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
                     foreach (MethodInfo Method in AllMethodsInType)
                     {
                         Methods.Add(Method);
+                        if (Method.Name.ToLower() == "me")
+                        {
+                            Console.Write("A");
+                        }
                     }
                 }
             }

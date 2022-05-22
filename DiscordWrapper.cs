@@ -14,7 +14,7 @@ namespace izolabella.Discord
         /// <summary>
         /// Initializes a new instance of <see cref="DiscordWrapper"/>.
         /// </summary>
-        /// <param name="Client">The <see cref="DiscordSocketClient"/> to be used.</param>
+        /// <param name="Client">The <see cref="DiscordSocketClient"/> to be used. The <see cref="DiscordSocketClient.StartAsync"/> should be called before constructing this class.</param>
         /// <param name="LoggingLevel">The level for which this library should log important things to the console.</param>
         public DiscordWrapper(DiscordSocketClient Client, LoggingLevel LoggingLevel = LoggingLevel.None)
         {
