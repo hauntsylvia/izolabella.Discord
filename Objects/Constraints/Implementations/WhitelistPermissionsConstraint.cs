@@ -37,14 +37,9 @@ namespace izolabella.Discord.Objects.Constraints.Implementations
 
         Task<bool> IIzolabellaCommandConstraint.CheckCommandValidityAsync(SocketSlashCommand CommandFired)
         {
-            if(CommandFired.User is SocketGuildUser SUser && CommandFired.Channel is SocketTextChannel SChannel)
-            {
-                return Task.FromResult(this.Permissions.All(P => SUser.GuildPermissions.Has(P)));
-            }
-            else
-            {
-                return Task.FromResult(!this.ValidOnlyInGuilds);
-            }
+            return CommandFired.User is SocketGuildUser SUser && CommandFired.Channel is SocketTextChannel SChannel
+                ? Task.FromResult(this.Permissions.All(P => SUser.GuildPermissions.Has(P)))
+                : Task.FromResult(!this.ValidOnlyInGuilds);
         }
     }
 }
