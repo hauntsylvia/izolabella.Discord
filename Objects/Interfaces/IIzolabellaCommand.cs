@@ -47,6 +47,12 @@ namespace izolabella.Discord.Objects.Interfaces
         public Task RunAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments);
 
         /// <summary>
+        /// The method that will run when all commands have been initialized. Comes from a static context: fired once.
+        /// </summary>
+        /// <returns></returns>
+        public Task OnLoadAsync(IIzolabellaCommand[] AllCommands);
+
+        /// <summary>
         /// The method that will run if the command invocation fails due to set constraints.
         /// </summary>
         /// <param name="Context">The context the handler will pass.</param>

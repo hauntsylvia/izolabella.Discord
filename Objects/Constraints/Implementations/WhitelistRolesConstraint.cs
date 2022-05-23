@@ -37,6 +37,9 @@ namespace izolabella.Discord.Objects.Constraints.Implementations
         /// <inheritdoc/>
         public ConstraintTypes Type => ConstraintTypes.WhitelistRoles;
 
+        /// <inheritdoc/>
+        public ulong? ConstrainToOneGuildOfThisId { get; set; }
+
         Task<bool> IIzolabellaCommandConstraint.CheckCommandValidityAsync(SocketSlashCommand CommandFired)
         {
             return CommandFired.User is SocketGuildUser SUser

@@ -18,6 +18,11 @@ namespace izolabella.Discord.Objects.Constraints.Interfaces
         public ConstraintTypes Type { get; }
 
         /// <summary>
+        /// If not null, this constraint will only apply itself to a particular guild.
+        /// </summary>
+        public ulong? ConstrainToOneGuildOfThisId { get; }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="CommandFired"></param>

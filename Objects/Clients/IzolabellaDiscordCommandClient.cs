@@ -23,8 +23,18 @@ namespace izolabella.Discord.Objects.Clients
         public IzolabellaDiscordCommandClient(DiscordSocketConfig Config)
         {
             this.Client = new(Config);
-            this.Commands = GetIzolabellaCommands();
+            this.Client.Ready += () =>
+            {
+                this.ClientReady = true;
+                return Task.CompletedTask;
+            };
+            this.Commands = GetIzolabellaCommandsAsync().Result;
         }
+
+        /// <summary>
+        /// True once the <see cref="DiscordSocketClient.Ready"/> event has fired.
+        /// </summary>
+        public bool ClientReady { get; private set; } = false;
 
         /// <summary>
         /// The wrapped <see cref="DiscordSocketClient"/>.
@@ -53,26 +63,35 @@ namespace izolabella.Discord.Objects.Clients
         /// Logs in and connects the <see cref="Client"/>.
         /// </summary>
         /// <param name="Token"></param>
+        /// <param name="RegisterCommandsAtTheSameTime">Set to true if calling this method should also register commands.</param>
         /// <returns></returns>
-        public async Task StartAsync(string Token)
+        public async Task StartAsync(string Token, bool RegisterCommandsAtTheSameTime = true)
         {
-            this.Client.Ready += async () =>
+            if(RegisterCommandsAtTheSameTime)
             {
-                await this.GetRidOfEmptyCommands();
-                await this.RegisterCommands();
-            };
+                this.Client.Ready += async () =>
+                {
+                    await this.GetRidOfEmptyCommands();
+                    await this.RegisterCommands();
+                };
+            }
             this.Client.SlashCommandExecuted += async (PassedCommand) =>
             {
                 IIzolabellaCommand? Command = this.Commands.FirstOrDefault(
                     Iz => NameConformer.DiscordCommandConformity(Iz.Name) == NameConformer.DiscordCommandConformity(PassedCommand.CommandName));
                 if(Command != null)
                 {
+                    ulong? GuildId = null;
+                    if(PassedCommand.User is SocketGuildUser SUser)
+                    {
+                        GuildId = SUser.Guild.Id;
+                    }
                     List<IzolabellaCommandArgument> SentParameters = new();
                     foreach(SocketSlashCommandDataOption Argument in PassedCommand.Data.Options)
                     {
                         SentParameters.Add(new(Argument.Name, "", Argument.Type, true, Argument.Value));
                     }
-                    IIzolabellaCommandConstraint? CausesFailure = Command.Constraints.FirstOrDefault(C =>
+                    IIzolabellaCommandConstraint? CausesFailure = Command.Constraints.Where(C => C.ConstrainToOneGuildOfThisId == null || GuildId == null || C.ConstrainToOneGuildOfThisId == GuildId).FirstOrDefault(C =>
                     {
                         return !C.CheckCommandValidityAsync(PassedCommand).Result;
                     });
@@ -91,6 +110,34 @@ namespace izolabella.Discord.Objects.Clients
             await this.Client.StartAsync();
         }
 
+        /// <summary>
+        /// Adds or updates commands.
+        /// </summary>
+        /// <param name="NewCommands">The commands to add or update.</param>
+        /// <returns></returns>
+        public async Task UpdateCommandsAsync(params IIzolabellaCommand[] NewCommands)
+        {
+            if(this.ClientReady)
+            {
+                foreach(IIzolabellaCommand NewCommand in NewCommands)
+                {
+                    IIzolabellaCommand? Existing = this.Commands.Find(C => C.Name == NewCommand.Name);
+                    if (Existing != null)
+                    {
+                        this.Commands.Remove(Existing);
+                    }
+                    this.Commands.Add(NewCommand);
+                }
+                await this.GetRidOfEmptyCommands();
+                await this.RegisterCommands();
+            }
+            else
+            {
+                await Task.Delay(50);
+                await this.UpdateCommandsAsync(NewCommands);
+            }
+        }
+
         internal async Task RegisterCommands()
         {
             foreach (SocketGuild Guild in this.Client.Guilds)
@@ -105,14 +152,19 @@ namespace izolabella.Discord.Objects.Clients
                             Name = NameConformer.DiscordCommandConformity(Param.Name),
                             Description = Param.Description,
                             IsRequired = Param.IsRequired,
-                            Type = Param.OptionType
+                            Type = Param.OptionType,
+                            Choices = Param.Choices?.Select(PC => new ApplicationCommandOptionChoiceProperties()
+                            {
+                                Name = PC.Name,
+                                Value = PC.Value
+                            }).ToList()
                         });
                     }
                     SlashCommandBuilder SlashCommandBuilder = new()
                     {
                         Name = NameConformer.DiscordCommandConformity(Command.Name),
                         Description = Command.Description,
-                        Options = Options
+                        Options = Options,
                     };
                     await Guild.CreateApplicationCommandAsync(SlashCommandBuilder.Build());
                 }
@@ -136,9 +188,13 @@ namespace izolabella.Discord.Objects.Clients
             }
         }
 
-        internal static List<IIzolabellaCommand> GetIzolabellaCommands()
+        /// <summary>
+        /// Gets all commands in the app domain.
+        /// </summary>
+        /// <returns>A list of all commands in the app domain with parameterless constructors.</returns>
+        public static async Task<List<IIzolabellaCommand>> GetIzolabellaCommandsAsync()
         {
-            List<IIzolabellaCommand> Commands = new();
+            List<IIzolabellaCommand> InitializedCommands = new();
             foreach(Assembly Ass in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach(Type T in Ass.GetTypes())
@@ -148,12 +204,16 @@ namespace izolabella.Discord.Objects.Clients
                         object? Instance = Activator.CreateInstance(T);
                         if(Instance != null && Instance is IIzolabellaCommand I)
                         {
-                            Commands.Add(I);
+                            InitializedCommands.Add(I);
                         }
                     }
                 }
             }
-            return Commands;
+            foreach (IIzolabellaCommand Command in InitializedCommands)
+            {
+                await Command.OnLoadAsync(InitializedCommands.ToArray());
+            }
+            return InitializedCommands;
         }
     }
 }

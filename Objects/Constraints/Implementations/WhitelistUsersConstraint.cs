@@ -30,6 +30,9 @@ namespace izolabella.Discord.Objects.Constraints.Implementations
         /// <inheritdoc/>
         public ConstraintTypes Type => ConstraintTypes.WhitelistUsers;
 
+        /// <inheritdoc/>
+        public ulong? ConstrainToOneGuildOfThisId { get; set; }
+
         Task<bool> IIzolabellaCommandConstraint.CheckCommandValidityAsync(SocketSlashCommand CommandFired)
         {
             return Task.FromResult(this.UserIds.Any(Id => Id == CommandFired.User.Id));

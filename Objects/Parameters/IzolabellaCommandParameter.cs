@@ -45,5 +45,10 @@ namespace izolabella.Discord.Objects.Parameters
         /// Whether this parameter is required or not.
         /// </summary>
         public bool IsRequired { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<IzolabellaCommandParameterChoices>? Choices { get; set; }
     }
 }
