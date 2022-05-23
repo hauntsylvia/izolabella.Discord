@@ -2,6 +2,8 @@
 global using Discord.Net;
 global using Discord.WebSocket;
 global using izolabella.ConsoleHelper;
+using izolabella.Discord.Objects.Arguments;
+using izolabella.Discord.Objects.Constraints.Interfaces;
 using izolabella.Discord.Objects.Interfaces;
 using izolabella.Discord.Objects.Parameters;
 using izolabella.Discord.Objects.Util;
@@ -35,6 +37,19 @@ namespace izolabella.Discord.Objects.Clients
         public List<IIzolabellaCommand> Commands { get; }
 
         /// <summary>
+        /// The method that will run if the command invocation fails due to set constraints.
+        /// </summary>
+        /// <param name="Context">The context the handler will pass.</param>
+        /// <param name="Arguments">The arguments the end user has invoked this command with.</param>
+        /// <param name="ConstraintThatFailed">The constraint that caused this method to get fired by the handler.</param>
+        public delegate Task CommandConstrainedHandler(CommandContext Context, IzolabellaCommandArgument[] Arguments, IIzolabellaCommandConstraint ConstraintThatFailed);
+        
+        /// <summary>
+        /// Fired when a command is constrained.
+        /// </summary>
+        public event CommandConstrainedHandler? OnCommandConstraint;
+
+        /// <summary>
         /// Logs in and connects the <see cref="Client"/>.
         /// </summary>
         /// <param name="Token"></param>
@@ -57,7 +72,19 @@ namespace izolabella.Discord.Objects.Clients
                     {
                         SentParameters.Add(new(Argument.Name, "", Argument.Type, true, Argument.Value));
                     }
-                    await Command.RunAsync(new(PassedCommand), SentParameters.ToArray());
+                    IIzolabellaCommandConstraint? CausesFailure = Command.Constraints.FirstOrDefault(C =>
+                    {
+                        return !C.CheckCommandValidityAsync(PassedCommand).Result;
+                    });
+                    if (CausesFailure == null)
+                    {
+                        await Command.RunAsync(new(PassedCommand), SentParameters.ToArray());
+                    }
+                    else
+                    {
+                        await (this.OnCommandConstraint != null ? this.OnCommandConstraint.Invoke(new(PassedCommand), SentParameters.ToArray(), CausesFailure) : Task.CompletedTask);
+                        await Command.OnConstrainmentAsync(new(PassedCommand), SentParameters.ToArray(), CausesFailure);
+                    }
                 }
             };
             await this.Client.LoginAsync(TokenType.Bot, Token, true);
