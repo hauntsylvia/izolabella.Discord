@@ -31,6 +31,8 @@ namespace MyDiscordBot.Commands
 
         public string Description => "Description of command goes here.";
 
+        public List<IIzolabellaCommandConstraint> Constraints { get; } = new();
+
         public IzolabellaCommandParameter[] Parameters => new[]
         {
             new IzolabellaCommandParameter("Param", "This is my parameter!", ApplicationCommandOptionType.Channel, true)
@@ -39,6 +41,16 @@ namespace MyDiscordBot.Commands
         public Task RunAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments)
         {
             // command runs here!
+        }
+
+        public Task OnLoadAsync(IIzolabellaCommand[] AllCommands)
+        {
+            // runs when all commands have been initialized - fired once.
+        }
+
+        public Task OnConstrainmentAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments, IIzolabellaCommandConstraint ConstraintThatFailed)
+        {
+            // when one of the constrainments don't pass the validity check by the handler, this method gets called.
         }
     }
 }
