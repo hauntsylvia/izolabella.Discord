@@ -60,6 +60,19 @@ namespace izolabella.Discord.Objects.Clients
         public event CommandConstrainedHandler? OnCommandConstraint;
 
         /// <summary>
+        /// The method that will run after a command is invoked.
+        /// </summary>
+        /// <param name="Context">The context the handler will pass.</param>
+        /// <param name="Arguments">The arguments the end user has invoked this command with.</param>
+        /// <param name="CommandInvoked">The command this handler invoked.</param>
+        public delegate Task CommandInvokedHandler(CommandContext Context, IzolabellaCommandArgument[] Arguments, IIzolabellaCommand CommandInvoked);
+        
+        /// <summary>
+        /// Fired when a command is constrained.
+        /// </summary>
+        public event CommandInvokedHandler? CommandInvoked;
+
+        /// <summary>
         /// Logs in and connects the <see cref="Client"/>.
         /// </summary>
         /// <param name="Token"></param>
@@ -98,6 +111,7 @@ namespace izolabella.Discord.Objects.Clients
                     if (CausesFailure == null)
                     {
                         await Command.RunAsync(new(PassedCommand), SentParameters.ToArray());
+                        await (this.CommandInvoked != null ? this.CommandInvoked.Invoke(new(PassedCommand), SentParameters.ToArray(), Command) : Task.CompletedTask);
                     }
                     else
                     {

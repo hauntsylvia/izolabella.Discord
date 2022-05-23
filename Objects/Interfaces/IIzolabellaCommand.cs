@@ -49,6 +49,10 @@ namespace izolabella.Discord.Objects.Interfaces
         /// <summary>
         /// The method that will run when all commands have been initialized. Comes from a static context: fired once.
         /// </summary>
+        /// 
+        /// <remarks>
+        /// This method is particularly good for being able to define parameters and constraints based off other commands.
+        /// </remarks>
         /// <returns></returns>
         public Task OnLoadAsync(IIzolabellaCommand[] AllCommands);
 
