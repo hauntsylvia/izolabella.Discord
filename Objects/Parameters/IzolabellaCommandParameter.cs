@@ -47,8 +47,18 @@ namespace izolabella.Discord.Objects.Parameters
         public bool IsRequired { get; }
 
         /// <summary>
-        /// 
+        /// All choices available for this parameter.
         /// </summary>
         public List<IzolabellaCommandParameterChoices>? Choices { get; set; }
+
+        /// <summary>
+        /// Maximum value.
+        /// </summary>
+        public double? MaxValue { get; set; }
+
+        /// <summary>
+        /// Minimum value.
+        /// </summary>
+        public double? MinimumValue { get; set; }
     }
 }

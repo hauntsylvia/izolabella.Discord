@@ -108,15 +108,16 @@ namespace izolabella.Discord.Objects.Clients
                     {
                         return !C.CheckCommandValidityAsync(PassedCommand).Result;
                     });
+                    CommandContext Context = new(PassedCommand, this);
                     if (CausesFailure == null)
                     {
-                        await Command.RunAsync(new(PassedCommand), SentParameters.ToArray());
-                        await (this.CommandInvoked != null ? this.CommandInvoked.Invoke(new(PassedCommand), SentParameters.ToArray(), Command) : Task.CompletedTask);
+                        await Command.RunAsync(Context, SentParameters.ToArray());
+                        await (this.CommandInvoked != null ? this.CommandInvoked.Invoke(Context, SentParameters.ToArray(), Command) : Task.CompletedTask);
                     }
                     else
                     {
-                        await (this.OnCommandConstraint != null ? this.OnCommandConstraint.Invoke(new(PassedCommand), SentParameters.ToArray(), CausesFailure) : Task.CompletedTask);
-                        await Command.OnConstrainmentAsync(new(PassedCommand), SentParameters.ToArray(), CausesFailure);
+                        await (this.OnCommandConstraint != null ? this.OnCommandConstraint.Invoke(Context, SentParameters.ToArray(), CausesFailure) : Task.CompletedTask);
+                        await Command.OnConstrainmentAsync(Context, SentParameters.ToArray(), CausesFailure);
                     }
                 }
             };
@@ -167,10 +168,12 @@ namespace izolabella.Discord.Objects.Clients
                             Description = Param.Description,
                             IsRequired = Param.IsRequired,
                             Type = Param.OptionType,
+                            MaxValue = Param.MaxValue,
+                            MinValue = Param.MinimumValue,
                             Choices = Param.Choices?.Select(PC => new ApplicationCommandOptionChoiceProperties()
                             {
                                 Name = PC.Name,
-                                Value = PC.Value
+                                Value = PC.Value,
                             }).ToList()
                         });
                     }
