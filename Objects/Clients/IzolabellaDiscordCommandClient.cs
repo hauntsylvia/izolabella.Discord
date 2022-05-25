@@ -68,7 +68,7 @@ namespace izolabella.Discord.Objects.Clients
         public delegate Task CommandInvokedHandler(CommandContext Context, IzolabellaCommandArgument[] Arguments, IIzolabellaCommand CommandInvoked);
         
         /// <summary>
-        /// Fired when a command is constrained.
+        /// Fired after a command is invoked.
         /// </summary>
         public event CommandInvokedHandler? CommandInvoked;
 
