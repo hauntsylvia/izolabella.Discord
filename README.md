@@ -1,7 +1,6 @@
 # 💞 izolabella.Discord
 
-This project was created as an alternative command handling library to the provided Discord.NET command handler, mostly for custom behavior not already provided.
-It is also considerably lighter than other handlers, and thus much easier to get started with.
+This project is an alternative to the command handler provided by Discord.NET for providing more detail to commands in a lightweight manner.
 
 # 🌸 Quality Status
 [![CodeFactor](https://www.codefactor.io/repository/github/izolabella/izolabella.discord/badge)](https://www.codefactor.io/repository/github/izolabella/izolabella.discord)
