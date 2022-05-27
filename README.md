@@ -21,7 +21,7 @@ A new instance of the `IzolabellaDiscordCommandClient` class must be initialized
 IzolabellaDiscordCommandClient Client = new(new DiscordSocketConfig(), false);
 ```
 
-The current version of this library uses classes for commands. To create a command, create a class that inherits the interface `IIzolabellaCommand`.
+The current version of this library uses classes for commands. To create a command, create a class that inherits the interface `IIzolabellaCommand`. **These classes must have parameterless constructors.**
 ```cs
 namespace MyDiscordBot.Commands
 {
