@@ -282,7 +282,6 @@ namespace izolabella.Discord.Objects.Clients
             List<SlashCommandBuilder> Commands = await this.GetCommandBuildersAsync();
             foreach (SlashCommandBuilder Command in Commands)
             {
-
                 (await this.GetIrrelevantCommandsAsync()).ToList().ForEach(async SAC =>
                 {
                     await SAC.DeleteAsync();
