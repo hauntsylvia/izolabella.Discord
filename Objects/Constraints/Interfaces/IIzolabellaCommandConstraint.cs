@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using izolabella.Discord.Objects.Enums;
+﻿using izolabella.Discord.Objects.Enums;
 
 namespace izolabella.Discord.Objects.Constraints.Interfaces
 {

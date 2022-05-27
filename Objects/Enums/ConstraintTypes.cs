@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace izolabella.Discord.Objects.Enums
+﻿namespace izolabella.Discord.Objects.Enums
 {
     /// <summary>
     /// Defines types of constraints.

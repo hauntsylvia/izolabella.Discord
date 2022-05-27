@@ -6,10 +6,10 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>izolabella</Authors>
-	<Version>5.1.0</Version>
+	<Version>6.0.0</Version>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<PackageReleaseNotes>
-	    Implemented the full 5.1.0 version.
+	    New command properties, client methods, and client configuration properties.
 	</PackageReleaseNotes>
 	<RepositoryUrl>https://github.com/izolabella/izolabella.Discord</RepositoryUrl>
 	<RepositoryType>github</RepositoryType>

@@ -1,11 +1,6 @@
 ﻿using izolabella.Discord.Objects.Arguments;
 using izolabella.Discord.Objects.Constraints.Interfaces;
 using izolabella.Discord.Objects.Parameters;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace izolabella.Discord.Objects.Interfaces
 {
@@ -27,6 +22,11 @@ namespace izolabella.Discord.Objects.Interfaces
         /// The description of the command.
         /// </summary>
         public string Description { get; }
+
+        /// <summary>
+        /// If true, this command is only allowed to be invoked in guilds (servers).
+        /// </summary>
+        public bool GuildsOnly { get; }
 
         /// <summary>
         /// A list of the parameters users may invoke this command with.
