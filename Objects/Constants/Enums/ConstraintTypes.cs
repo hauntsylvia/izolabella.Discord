@@ -1,4 +1,4 @@
-﻿namespace izolabella.Discord.Objects.Enums
+﻿namespace izolabella.Discord.Objects.Constants.Enums
 {
     /// <summary>
     /// Defines types of constraints.

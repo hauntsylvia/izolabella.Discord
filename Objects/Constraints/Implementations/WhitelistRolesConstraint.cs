@@ -1,5 +1,5 @@
-﻿using izolabella.Discord.Objects.Constraints.Interfaces;
-using izolabella.Discord.Objects.Enums;
+﻿using izolabella.Discord.Objects.Constants.Enums;
+using izolabella.Discord.Objects.Constraints.Interfaces;
 
 namespace izolabella.Discord.Objects.Constraints.Implementations
 {

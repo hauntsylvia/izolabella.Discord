@@ -1,4 +1,4 @@
-﻿using izolabella.Discord.Objects.Enums;
+﻿using izolabella.Discord.Objects.Constants.Enums;
 
 namespace izolabella.Discord.Objects.Constraints.Interfaces
 {
