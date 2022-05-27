@@ -3,7 +3,7 @@
 This project was created as an alternative command handling library to the provided Discord.NET command handler, mostly for custom behavior not already provided.
 It is also considerably lighter than other handlers, and thus much easier to get started with.
 
-# 💮 Status
+# 🌸 Quality Status
 [![CodeFactor](https://www.codefactor.io/repository/github/izolabella/izolabella.discord/badge)](https://www.codefactor.io/repository/github/izolabella/izolabella.discord)
 
 # 👩‍💻 Getting Started
