@@ -5,6 +5,8 @@ VisualStudioVersion = 17.2.32210.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "izolabella.Discord", "izolabella.Discord.csproj", "{BE34D007-533B-4629-A71C-DE8AA5749ED2}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BotTest", "..\BotTest\BotTest.csproj", "{58489B8E-0C65-46D0-A826-91C7E61C936E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{BE34D007-533B-4629-A71C-DE8AA5749ED2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE34D007-533B-4629-A71C-DE8AA5749ED2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE34D007-533B-4629-A71C-DE8AA5749ED2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58489B8E-0C65-46D0-A826-91C7E61C936E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58489B8E-0C65-46D0-A826-91C7E61C936E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58489B8E-0C65-46D0-A826-91C7E61C936E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58489B8E-0C65-46D0-A826-91C7E61C936E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

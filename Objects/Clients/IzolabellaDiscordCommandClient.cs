@@ -280,7 +280,17 @@ namespace izolabella.Discord.Objects.Clients
         internal async Task<IReadOnlyCollection<SocketApplicationCommand>> GetIrrelevantCommandsAsync()
         {
             IReadOnlyCollection<SocketApplicationCommand> CurrentCommands = this.GlobalCommands ? this.Client.Guilds.SelectMany((G) =>
-            G.GetApplicationCommandsAsync().Result).Where(C => C.ApplicationId == this.Client.CurrentUser.Id).ToList() : await this.Client.GetGlobalApplicationCommandsAsync();
+            {
+                try
+                {
+                    return G.GetApplicationCommandsAsync().Result;
+                }
+                catch
+                {
+                    return new List<SocketApplicationCommand>();
+                }
+            }
+            ).Where(C => C.ApplicationId == this.Client.CurrentUser.Id).ToList() : await this.Client.GetGlobalApplicationCommandsAsync();
             return CurrentCommands;
         }
 
