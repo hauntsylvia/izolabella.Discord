@@ -6,10 +6,10 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>izolabella</Authors>
-	<Version>6.1.2</Version>
+	<Version>6.1.4</Version>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<PackageReleaseNotes>
-	    Fixed another logic error.
+	    Corrected logic error.
 	</PackageReleaseNotes>
 	<RepositoryUrl>https://github.com/izolabella/izolabella.Discord</RepositoryUrl>
 	<RepositoryType>github</RepositoryType>

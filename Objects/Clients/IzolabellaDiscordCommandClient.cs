@@ -273,9 +273,13 @@ namespace izolabella.Discord.Objects.Clients
             return Commands;
         }
 
+        /// <summary>
+        /// Returns all guild commands if the client is meant to be using global and vice versa.
+        /// </summary>
+        /// <returns></returns>
         internal async Task<IReadOnlyCollection<SocketApplicationCommand>> GetIrrelevantCommandsAsync()
         {
-            IReadOnlyCollection<SocketApplicationCommand> CurrentCommands = !this.GlobalCommands ? this.Client.Guilds.SelectMany((G) =>
+            IReadOnlyCollection<SocketApplicationCommand> CurrentCommands = this.GlobalCommands ? this.Client.Guilds.SelectMany((G) =>
             G.GetApplicationCommandsAsync().Result).Where(C => C.ApplicationId == this.Client.CurrentUser.Id).ToList() : await this.Client.GetGlobalApplicationCommandsAsync();
             return CurrentCommands;
         }

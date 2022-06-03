@@ -37,7 +37,7 @@ namespace MyDiscordBot.Commands
 
         public List<IIzolabellaCommandConstraint> Constraints { get; } = new();
 
-        public IzolabellaCommandParameter[] Parameters => new[]
+        public List<IzolabellaCommandParameter> Parameters { get; } = new()
         {
             new IzolabellaCommandParameter("Param", "This is my parameter!", ApplicationCommandOptionType.Channel, true)
         };
