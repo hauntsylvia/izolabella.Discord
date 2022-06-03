@@ -21,6 +21,7 @@ namespace izolabella.Discord.Objects.Clients
         /// <param name="GlobalCommands">If true, all commands will be created globally. This may take up to an hour to show up on Discord's side.</param>
         public IzolabellaDiscordCommandClient(DiscordSocketConfig Config, bool GlobalCommands)
         {
+            this.GlobalCommands = GlobalCommands;
             this.Client = new(Config);
             this.Client.Ready += () =>
             {
@@ -29,7 +30,6 @@ namespace izolabella.Discord.Objects.Clients
             };
             this.Commands = GetIzolabellaCommandsAsync().Result;
             this.Client.JoinedGuild += this.ClientJoinedGuildAsync;
-            this.GlobalCommands = GlobalCommands;
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace izolabella.Discord.Objects.Clients
                 await this.Client.Rest.GetGuildAsync(Arg.Id);
                 if (!this.GlobalCommands)
                 {
-                    await this.GetRidOfEmptyCommandsAsync();
+                    await this.DeleteIrrelevantCommands();
                     await this.RegisterCommandsAsync().ConfigureAwait(false);
                 }
                 this.AfterJoinedGuild?.Invoke(Arg);
@@ -132,7 +132,7 @@ namespace izolabella.Discord.Objects.Clients
             {
                 this.Client.Ready += async () =>
                 {
-                    await this.GetRidOfEmptyCommandsAsync();
+                    await this.DeleteIrrelevantCommands();
                     await this.RegisterCommandsAsync();
                 };
             }
@@ -191,7 +191,7 @@ namespace izolabella.Discord.Objects.Clients
                     }
                     this.Commands.Add(NewCommand);
                 }
-                await this.GetRidOfEmptyCommandsAsync();
+                await this.DeleteIrrelevantCommands();
                 await this.RegisterCommandsAsync();
             }
             else
@@ -266,13 +266,16 @@ namespace izolabella.Discord.Objects.Clients
 
         internal async Task<IReadOnlyCollection<SocketApplicationCommand>> GetRelevantCommandsAsync()
         {
-            IReadOnlyCollection<SocketApplicationCommand> CurrentCommands = !this.GlobalCommands ? this.Client.Guilds.SelectMany((G) =>
-            G.GetApplicationCommandsAsync().Result).Where(C => C.ApplicationId == this.Client.CurrentUser.Id).ToList() : await this.Client.GetGlobalApplicationCommandsAsync();
-            return CurrentCommands;
+            List<SocketApplicationCommand> Commands = new();
+            Commands = !this.GlobalCommands
+                ? this.Client.Guilds.SelectMany((G) => G.GetApplicationCommandsAsync().Result).Where(C => C.ApplicationId == this.Client.CurrentUser.Id).ToList()
+                : (await this.Client.GetGlobalApplicationCommandsAsync()).ToList();
+            return Commands;
         }
+
         internal async Task<IReadOnlyCollection<SocketApplicationCommand>> GetIrrelevantCommandsAsync()
         {
-            IReadOnlyCollection<SocketApplicationCommand> CurrentCommands = this.GlobalCommands ? this.Client.Guilds.SelectMany((G) =>
+            IReadOnlyCollection<SocketApplicationCommand> CurrentCommands = !this.GlobalCommands ? this.Client.Guilds.SelectMany((G) =>
             G.GetApplicationCommandsAsync().Result).Where(C => C.ApplicationId == this.Client.CurrentUser.Id).ToList() : await this.Client.GetGlobalApplicationCommandsAsync();
             return CurrentCommands;
         }
@@ -282,10 +285,6 @@ namespace izolabella.Discord.Objects.Clients
             List<SlashCommandBuilder> Commands = await this.GetCommandBuildersAsync();
             foreach (SlashCommandBuilder Command in Commands)
             {
-                (await this.GetIrrelevantCommandsAsync()).ToList().ForEach(async SAC =>
-                {
-                    await SAC.DeleteAsync();
-                });
                 if (this.GlobalCommands)
                 {
                     await this.Client.CreateGlobalApplicationCommandAsync(Command.Build());
@@ -298,7 +297,7 @@ namespace izolabella.Discord.Objects.Clients
             }
         }
 
-        internal async Task GetRidOfEmptyCommandsAsync()
+        internal async Task DeleteIrrelevantCommands()
         {
             foreach (SocketApplicationCommand Command in await this.GetRelevantCommandsAsync())
             {
@@ -310,6 +309,10 @@ namespace izolabella.Discord.Objects.Clients
                     }
                 }
             }
+            (await this.GetIrrelevantCommandsAsync()).ToList().ForEach(async SAC =>
+            {
+                await SAC.DeleteAsync();
+            });
         }
     }
 }
