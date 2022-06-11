@@ -21,6 +21,7 @@ namespace izolabella.Discord.Objects.Clients
         /// <param name="GlobalCommands">If true, all commands will be created globally. This may take up to an hour to show up on Discord's side.</param>
         public IzolabellaDiscordCommandClient(DiscordSocketConfig Config, bool GlobalCommands)
         {
+            this.SelfAss = Assembly.GetCallingAssembly();
             this.GlobalCommands = GlobalCommands;
             this.Client = new(Config);
             this.Client.Ready += () =>
@@ -28,9 +29,11 @@ namespace izolabella.Discord.Objects.Clients
                 this.ClientReady = true;
                 return Task.CompletedTask;
             };
-            this.Commands = GetIzolabellaCommandsAsync().Result;
+            this.Commands = GetIzolabellaCommandsAsync(this.SelfAss).Result;
             this.Client.JoinedGuild += this.ClientJoinedGuildAsync;
         }
+
+        private Assembly SelfAss { get; }
 
         /// <summary>
         /// True once the <see cref="DiscordSocketClient.Ready"/> event has fired.
@@ -152,10 +155,7 @@ namespace izolabella.Discord.Objects.Clients
                     {
                         SentParameters.Add(new(Argument.Name, "", Argument.Type, true, Argument.Value));
                     }
-                    IIzolabellaCommandConstraint? CausesFailure = Command.Constraints.Where(C => C.ConstrainToOneGuildOfThisId == null || GuildId == null || C.ConstrainToOneGuildOfThisId == GuildId).FirstOrDefault(C =>
-                    {
-                        return !C.CheckCommandValidityAsync(PassedCommand).Result;
-                    });
+                    IIzolabellaCommandConstraint? CausesFailure = Command.Constraints.Where(C => C.ConstrainToOneGuildOfThisId == null || GuildId == null || C.ConstrainToOneGuildOfThisId == GuildId).FirstOrDefault(C => !C.CheckCommandValidityAsync(PassedCommand).Result);
                     CommandContext Context = new(PassedCommand, this);
                     if (CausesFailure == null)
                     {
@@ -205,20 +205,18 @@ namespace izolabella.Discord.Objects.Clients
         /// Gets all commands in the app domain.
         /// </summary>
         /// <returns>A list of all commands in the app domain with parameterless constructors.</returns>
-        public static async Task<List<IIzolabellaCommand>> GetIzolabellaCommandsAsync()
+        public static async Task<List<IIzolabellaCommand>> GetIzolabellaCommandsAsync(Assembly LoadsFrom)
         {
             List<IIzolabellaCommand> InitializedCommands = new();
-            foreach (Assembly Ass in AppDomain.CurrentDomain.GetAssemblies())
+
+            foreach (Type T in LoadsFrom.GetTypes())
             {
-                foreach (Type T in Ass.GetTypes())
+                if (typeof(IIzolabellaCommand).IsAssignableFrom(T) && !T.IsInterface)
                 {
-                    if (typeof(IIzolabellaCommand).IsAssignableFrom(T) && !T.IsInterface)
+                    object? Instance = Activator.CreateInstance(T);
+                    if (Instance is not null and IIzolabellaCommand I)
                     {
-                        object? Instance = Activator.CreateInstance(T);
-                        if (Instance != null && Instance is IIzolabellaCommand I)
-                        {
-                            InitializedCommands.Add(I);
-                        }
+                        InitializedCommands.Add(I);
                     }
                 }
             }
@@ -323,10 +321,7 @@ namespace izolabella.Discord.Objects.Clients
                     }
                 }
             }
-            (await this.GetIrrelevantCommandsAsync()).ToList().ForEach(async SAC =>
-            {
-                await SAC.DeleteAsync();
-            });
+            (await this.GetIrrelevantCommandsAsync()).ToList().ForEach(async SAC => await SAC.DeleteAsync());
         }
     }
 }
