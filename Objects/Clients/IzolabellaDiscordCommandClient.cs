@@ -112,14 +112,14 @@ namespace izolabella.Discord.Objects.Clients
         {
             if (this.ClientReady)
             {
-                this.JoinedGuild?.Invoke(Arg);
-                await this.Client.Rest.GetGuildAsync(Arg.Id);
+                _ = (this.JoinedGuild?.Invoke(Arg));
+                _ = await this.Client.Rest.GetGuildAsync(Arg.Id);
                 if (!this.GlobalCommands)
                 {
                     await this.DeleteIrrelevantCommands();
                     await this.RegisterCommandsAsync().ConfigureAwait(false);
                 }
-                this.AfterJoinedGuild?.Invoke(Arg);
+                _ = (this.AfterJoinedGuild?.Invoke(Arg));
             }
         }
 
@@ -187,7 +187,7 @@ namespace izolabella.Discord.Objects.Clients
                     IIzolabellaCommand? Existing = this.Commands.Find(C => C.Name == NewCommand.Name);
                     if (Existing != null)
                     {
-                        this.Commands.Remove(Existing);
+                        _ = this.Commands.Remove(Existing);
                     }
                     this.Commands.Add(NewCommand);
                 }
@@ -299,7 +299,7 @@ namespace izolabella.Discord.Objects.Clients
             {
                 if (this.GlobalCommands)
                 {
-                    await this.Client.CreateGlobalApplicationCommandAsync(Command.Build());
+                    _ = await this.Client.CreateGlobalApplicationCommandAsync(Command.Build());
                 }
                 else
                 {

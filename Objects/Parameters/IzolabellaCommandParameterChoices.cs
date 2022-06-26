@@ -23,7 +23,7 @@
         public IzolabellaCommandParameterChoices(string Name, object Value)
         {
             this.Name = Name;
-            this.Value = Value is string || Value is double || Value is float || Value is int || Value is long || Value is ulong || Value is bool
+            this.Value = Value is string or double or float or int or long or ulong or bool
                 ? Value
                 : throw new ArgumentException("", paramName: nameof(Value));
         }
