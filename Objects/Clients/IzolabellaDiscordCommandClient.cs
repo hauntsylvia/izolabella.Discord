@@ -163,7 +163,7 @@ namespace izolabella.Discord.Objects.Clients
                     IIzolabellaCommandConstraint? CausesFailure = Command.Constraints.Where(C => C.ConstrainToOneGuildOfThisId == null || GuildId == null || C.ConstrainToOneGuildOfThisId == GuildId).FirstOrDefault(C => !C.CheckCommandValidityAsync(PassedCommand).Result);
                     CommandContext Context = new(PassedCommand, this);
                     bool RawCheck = await (this.PreCommandInvokeCheck?.Invoke(Context) ?? Task.FromResult(true));
-                    bool Check = this.PreCommandInvokeCheck == null ? true : RawCheck;
+                    bool Check = this.PreCommandInvokeCheck == null || RawCheck;
                     if (Check)
                     {
                         if (CausesFailure == null)
