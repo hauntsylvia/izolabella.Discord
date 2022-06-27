@@ -82,6 +82,11 @@ namespace izolabella.Discord.Objects.Clients
         public event CommandInvokedHandler? CommandInvoked;
 
         /// <summary>
+        /// Run before a command is fired to check command validity.
+        /// </summary>
+        public Func<CommandContext, Task<bool>>? PreCommandInvokeCheck { get; set; }
+
+        /// <summary>
         /// The method that will run after the client joins a new guild.
         /// </summary>
         /// <param name="Arg">The guild.</param>
@@ -157,20 +162,36 @@ namespace izolabella.Discord.Objects.Clients
                     }
                     IIzolabellaCommandConstraint? CausesFailure = Command.Constraints.Where(C => C.ConstrainToOneGuildOfThisId == null || GuildId == null || C.ConstrainToOneGuildOfThisId == GuildId).FirstOrDefault(C => !C.CheckCommandValidityAsync(PassedCommand).Result);
                     CommandContext Context = new(PassedCommand, this);
-                    if (CausesFailure == null)
+                    bool RawCheck = await (this.PreCommandInvokeCheck?.Invoke(Context) ?? Task.FromResult(true));
+                    bool Check = this.PreCommandInvokeCheck == null ? true : RawCheck;
+                    if (Check)
                     {
-                        await Command.RunAsync(Context, SentParameters.ToArray());
-                        await (this.CommandInvoked != null ? this.CommandInvoked.Invoke(Context, SentParameters.ToArray(), Command) : Task.CompletedTask);
-                    }
-                    else
-                    {
-                        await (this.OnCommandConstraint != null ? this.OnCommandConstraint.Invoke(Context, SentParameters.ToArray(), CausesFailure) : Task.CompletedTask);
-                        await Command.OnConstrainmentAsync(Context, SentParameters.ToArray(), CausesFailure);
+                        if (CausesFailure == null)
+                        {
+                            await Command.RunAsync(Context, SentParameters.ToArray());
+                            await (this.CommandInvoked != null ? this.CommandInvoked.Invoke(Context, SentParameters.ToArray(), Command) : Task.CompletedTask);
+                        }
+                        else
+                        {
+                            await (this.OnCommandConstraint != null ? this.OnCommandConstraint.Invoke(Context, SentParameters.ToArray(), CausesFailure) : Task.CompletedTask);
+                            await Command.OnConstrainmentAsync(Context, SentParameters.ToArray(), CausesFailure);
+                        }
                     }
                 }
             };
             await this.Client.LoginAsync(TokenType.Bot, Token, true);
             await this.Client.StartAsync();
+        }
+
+        /// <summary>
+        /// Logs the client out before disposing its resources.
+        /// </summary>
+        /// <returns></returns>
+        public async Task StopAsync()
+        {
+            await this.Client.LogoutAsync();
+            await this.Client.StopAsync();
+            await this.Client.DisposeAsync();
         }
 
         /// <summary>
