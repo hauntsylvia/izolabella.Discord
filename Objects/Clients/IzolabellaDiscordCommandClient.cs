@@ -6,6 +6,7 @@ using izolabella.Discord.Objects.Constraints.Interfaces;
 using izolabella.Discord.Objects.Interfaces;
 using izolabella.Discord.Objects.Parameters;
 using izolabella.Discord.Objects.Util;
+using izolabella.Util;
 using System.Reflection;
 
 namespace izolabella.Discord.Objects.Clients
@@ -101,7 +102,7 @@ namespace izolabella.Discord.Objects.Clients
         /// <summary>
         /// Run before a command is fired to check command validity.
         /// </summary>
-        public Func<CommandContext, Task<bool>>? PreCommandInvokeCheck { get; set; }
+        public Func<IzolabellaCommand, CommandContext, Task<bool>>? PreCommandInvokeCheck { get; set; }
 
         /// <summary>
         /// The method that will run after the client joins a new guild.
@@ -183,7 +184,7 @@ namespace izolabella.Discord.Objects.Clients
                     }
                     IIzolabellaCommandConstraint? CausesFailure = Command.Constraints.Where(C => C.ConstrainToOneGuildOfThisId == null || GuildId == null || C.ConstrainToOneGuildOfThisId == GuildId).FirstOrDefault(C => !C.CheckCommandValidityAsync(PassedCommand).Result);
                     CommandContext Context = new(PassedCommand, this);
-                    bool RawCheck = await (this.PreCommandInvokeCheck?.Invoke(Context) ?? Task.FromResult(true));
+                    bool RawCheck = await (this.PreCommandInvokeCheck?.Invoke(Command, Context) ?? Task.FromResult(true));
                     bool Check = this.PreCommandInvokeCheck == null || RawCheck;
                     if (Check)
                     {
@@ -257,19 +258,8 @@ namespace izolabella.Discord.Objects.Clients
         /// <returns>A list of all commands in the app domain with parameterless constructors.</returns>
         public static async Task<List<IzolabellaCommand>> GetIzolabellaCommandsAsync(Assembly LoadsFrom)
         {
-            List<IzolabellaCommand> InitializedCommands = new();
+            List<IzolabellaCommand> InitializedCommands = BaseImplementationUtil.GetItems<IzolabellaCommand>(LoadsFrom);
 
-            foreach (Type T in LoadsFrom.GetTypes())
-            {
-                if (typeof(IzolabellaCommand).IsAssignableFrom(T) && !T.IsInterface)
-                {
-                    object? Instance = Activator.CreateInstance(T);
-                    if (Instance is not null and IzolabellaCommand I)
-                    {
-                        InitializedCommands.Add(I);
-                    }
-                }
-            }
             foreach (IzolabellaCommand Command in InitializedCommands)
             {
                 await Command.OnLoadAsync(InitializedCommands.ToArray());
