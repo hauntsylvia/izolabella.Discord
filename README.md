@@ -23,38 +23,43 @@ A new instance of the `IzolabellaDiscordCommandClient` class must be initialized
 IzolabellaDiscordCommandClient Client = new(new DiscordSocketConfig(), false);
 ```
 
-The current version of this library uses classes for commands. To create a command, create a class that inherits the interface `IIzolabellaCommand`. **These classes must have parameterless constructors.**
+The current version of this library uses classes for commands. To create a command, create a class that inherits the abstract class `IzolabellaCommand`. **These classes must have parameterless constructors.**
 ```cs
 namespace MyDiscordBot.Commands
 {
-    public class MyCommand : IIzolabellaCommand
+    public class MyCommand : IzolabellaCommand
     {
-        public string Name => "Command";
+        public override string Name => "Command";
 
-        public string Description => "My command's description.'";
+        public override string Description => "My command's description.'";
 
-        public bool GuildsOnly => true;
+        public override bool GuildsOnly => true;
 
-        public List<IIzolabellaCommandConstraint> Constraints { get; } = new();
+        public override List<IIzolabellaCommandConstraint> Constraints { get; } = new();
 
-        public List<IzolabellaCommandParameter> Parameters { get; } = new()
+        public override List<IzolabellaCommandParameter> Parameters { get; } = new()
         {
             new IzolabellaCommandParameter("Param", "This is my parameter!", ApplicationCommandOptionType.Channel, true)
         };
 
-        public Task RunAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments)
+        public override Task RunAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments)
         {
             // command runs here!
         }
 
-        public Task OnLoadAsync(IIzolabellaCommand[] AllCommands)
+        public override Task OnLoadAsync(IIzolabellaCommand[] AllCommands)
         {
             // runs when all commands have been initialized - fired once.
         }
 
-        public Task OnConstrainmentAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments, IIzolabellaCommandConstraint ConstraintThatFailed)
+        public override Task OnConstrainmentAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments, IIzolabellaCommandConstraint ConstraintThatFailed)
         {
             // when one of the constrainments don't pass the validity check by the handler, this method gets called.
+        }
+        
+        public override Task OnErrorAsync(HttpException Error)
+        {
+            // when an error happens, this method will run.
         }
     }
 }
@@ -64,5 +69,9 @@ To get things going, call the following method on the `IzolabellaDiscordCommandC
 ```cs
 await Client.StartAsync();
 ```
+
+Further, the client itself offers numerous events to hook on to. Browse intellisense context menus to see all the options.
+
+***Arguments will be in kebab case when passed back to the RunAsync methods!!! When comparing arguments by name, please keep this in mind. For example, if I have a parameter named "Channel Id", I should check in the arguments for an argument named "channel-id".
 
 __I want to make this as useable as possible for you. I have no in-depth documentation since things are currently changing rapidly. For questions and how-tos, please send me a request on Discord at `izolabella.bin#0216`.__

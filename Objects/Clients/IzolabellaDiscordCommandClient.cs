@@ -1,5 +1,6 @@
 ﻿global using Discord;
 global using Discord.WebSocket;
+using Discord.Net;
 using izolabella.Discord.Objects.Arguments;
 using izolabella.Discord.Objects.Constraints.Interfaces;
 using izolabella.Discord.Objects.Interfaces;
@@ -33,6 +34,8 @@ namespace izolabella.Discord.Objects.Clients
             this.Client.JoinedGuild += this.ClientJoinedGuildAsync;
         }
 
+        #region properties
+
         private Assembly SelfAss { get; }
 
         /// <summary>
@@ -48,12 +51,16 @@ namespace izolabella.Discord.Objects.Clients
         /// <summary>
         /// The commands found by this instance.
         /// </summary>
-        public List<IIzolabellaCommand> Commands { get; }
+        public List<IzolabellaCommand> Commands { get; }
 
         /// <summary>
         /// A bool representing whether the client should make commands global or not.
         /// </summary>
         public bool GlobalCommands { get; }
+
+        #endregion
+
+        #region events
 
         /// <summary>
         /// The method that will run if the command invocation fails due to set constraints.
@@ -69,12 +76,22 @@ namespace izolabella.Discord.Objects.Clients
         public event CommandConstrainedHandler? OnCommandConstraint;
 
         /// <summary>
+        /// The method that will run if the command fails due to an exception.
+        /// </summary>
+        public delegate Task CommandExceptionHandler(HttpException Exception);
+
+        /// <summary>
+        /// Fired when a command errors.
+        /// </summary>
+        public event CommandExceptionHandler? OnCommandError;
+
+        /// <summary>
         /// The method that will run after a command is invoked.
         /// </summary>
         /// <param name="Context">The context the handler will pass.</param>
         /// <param name="Arguments">The arguments the end user has invoked this command with.</param>
         /// <param name="CommandInvoked">The command this handler invoked.</param>
-        public delegate Task CommandInvokedHandler(CommandContext Context, IzolabellaCommandArgument[] Arguments, IIzolabellaCommand CommandInvoked);
+        public delegate Task CommandInvokedHandler(CommandContext Context, IzolabellaCommandArgument[] Arguments, IzolabellaCommand CommandInvoked);
 
         /// <summary>
         /// Fired after a command is invoked.
@@ -107,6 +124,10 @@ namespace izolabella.Discord.Objects.Clients
         /// Fired after a the client has joined a guild, but before this client processes it.
         /// </summary>
         public event BeforeGuildJoinHandler? JoinedGuild;
+
+        #endregion
+
+        #region methods
 
         /// <summary>
         /// Updates commands.
@@ -146,7 +167,7 @@ namespace izolabella.Discord.Objects.Clients
             }
             this.Client.SlashCommandExecuted += async (PassedCommand) =>
             {
-                IIzolabellaCommand? Command = this.Commands.FirstOrDefault(
+                IzolabellaCommand? Command = this.Commands.FirstOrDefault(
                     Iz => NameConformer.DiscordCommandConformity(Iz.Name) == NameConformer.DiscordCommandConformity(PassedCommand.CommandName));
                 if (Command != null)
                 {
@@ -168,7 +189,15 @@ namespace izolabella.Discord.Objects.Clients
                     {
                         if (CausesFailure == null)
                         {
-                            await Command.RunAsync(Context, SentParameters.ToArray());
+                            try
+                            {
+                                await Command.RunAsync(Context, SentParameters.ToArray());
+                            }
+                            catch(HttpException Ex)
+                            {
+                                this.OnCommandError?.Invoke(Ex);
+                                await Command.OnErrorAsync(Ex);
+                            }
                             await (this.CommandInvoked != null ? this.CommandInvoked.Invoke(Context, SentParameters.ToArray(), Command) : Task.CompletedTask);
                         }
                         else
@@ -199,13 +228,13 @@ namespace izolabella.Discord.Objects.Clients
         /// </summary>
         /// <param name="NewCommands">The commands to add or update.</param>
         /// <returns></returns>
-        public async Task UpdateCommandsAsync(params IIzolabellaCommand[] NewCommands)
+        public async Task UpdateCommandsAsync(params IzolabellaCommand[] NewCommands)
         {
             if (this.ClientReady)
             {
-                foreach (IIzolabellaCommand NewCommand in NewCommands)
+                foreach (IzolabellaCommand NewCommand in NewCommands)
                 {
-                    IIzolabellaCommand? Existing = this.Commands.Find(C => C.Name == NewCommand.Name);
+                    IzolabellaCommand? Existing = this.Commands.Find(C => C.Name == NewCommand.Name);
                     if (Existing != null)
                     {
                         _ = this.Commands.Remove(Existing);
@@ -226,22 +255,22 @@ namespace izolabella.Discord.Objects.Clients
         /// Gets all commands in the app domain.
         /// </summary>
         /// <returns>A list of all commands in the app domain with parameterless constructors.</returns>
-        public static async Task<List<IIzolabellaCommand>> GetIzolabellaCommandsAsync(Assembly LoadsFrom)
+        public static async Task<List<IzolabellaCommand>> GetIzolabellaCommandsAsync(Assembly LoadsFrom)
         {
-            List<IIzolabellaCommand> InitializedCommands = new();
+            List<IzolabellaCommand> InitializedCommands = new();
 
             foreach (Type T in LoadsFrom.GetTypes())
             {
-                if (typeof(IIzolabellaCommand).IsAssignableFrom(T) && !T.IsInterface)
+                if (typeof(IzolabellaCommand).IsAssignableFrom(T) && !T.IsInterface)
                 {
                     object? Instance = Activator.CreateInstance(T);
-                    if (Instance is not null and IIzolabellaCommand I)
+                    if (Instance is not null and IzolabellaCommand I)
                     {
                         InitializedCommands.Add(I);
                     }
                 }
             }
-            foreach (IIzolabellaCommand Command in InitializedCommands)
+            foreach (IzolabellaCommand Command in InitializedCommands)
             {
                 await Command.OnLoadAsync(InitializedCommands.ToArray());
             }
@@ -251,7 +280,7 @@ namespace izolabella.Discord.Objects.Clients
         internal Task<List<SlashCommandBuilder>> GetCommandBuildersAsync()
         {
             List<SlashCommandBuilder> CommandBuilders = new();
-            foreach (IIzolabellaCommand Command in this.Commands)
+            foreach (IzolabellaCommand Command in this.Commands)
             {
                 List<SlashCommandOptionBuilder> Options = new();
                 foreach (IzolabellaCommandParameter Param in Command.Parameters)
@@ -344,5 +373,6 @@ namespace izolabella.Discord.Objects.Clients
             }
             (await this.GetIrrelevantCommandsAsync()).ToList().ForEach(async SAC => await SAC.DeleteAsync());
         }
+        #endregion
     }
 }

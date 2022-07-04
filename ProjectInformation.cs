@@ -11,7 +11,7 @@ namespace izolabella.Discord
         /// <summary>
         /// The current version of this project, or null if not found.
         /// </summary>
-        public static Version? Version => Assembly.GetAssembly(typeof(IIzolabellaCommand))?.GetName().Version;
+        public static Version? Version => Assembly.GetAssembly(typeof(IzolabellaCommand))?.GetName().Version;
 
         /// <summary>
         /// A string relevant to my preferences of being credited for usage on UI of any sort.
