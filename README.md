@@ -72,6 +72,6 @@ await Client.StartAsync();
 
 Further, the client itself offers numerous events to hook on to. Browse intellisense context menus to see all the options.
 
-***Arguments will be in kebab case when passed back to the RunAsync methods!!! When comparing arguments by name, please keep this in mind. For example, if I have a parameter named "Channel Id", I should check in the arguments for an argument named "channel-id".
+***Arguments will be in kebab case when passed back to the RunAsync methods!!! When comparing arguments by name, please keep this in mind. For example, if I have a parameter named "Channel Id", I should check in the arguments for an argument named "channel-id".***
 
 __I want to make this as useable as possible for you. I have no in-depth documentation since things are currently changing rapidly. For questions and how-tos, please send me a request on Discord at `izolabella.bin#0216`.__
