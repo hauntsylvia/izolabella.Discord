@@ -78,7 +78,7 @@ namespace izolabella.Discord.Objects.Clients
         /// <summary>
         /// The method that will run if the command fails due to an exception.
         /// </summary>
-        public delegate Task CommandExceptionHandler(HttpException Exception);
+        public delegate Task CommandExceptionHandler(IzolabellaCommand? Command, CommandContext? Context, HttpException Exception);
 
         /// <summary>
         /// Fired when a command errors.
@@ -195,8 +195,8 @@ namespace izolabella.Discord.Objects.Clients
                             }
                             catch(HttpException Ex)
                             {
-                                this.OnCommandError?.Invoke(Ex);
-                                await Command.OnErrorAsync(Ex);
+                                this.OnCommandError?.Invoke(Command, Context, Ex);
+                                await Command.OnErrorAsync(Context, Ex);
                             }
                             await (this.CommandInvoked != null ? this.CommandInvoked.Invoke(Context, SentParameters.ToArray(), Command) : Task.CompletedTask);
                         }

@@ -75,9 +75,10 @@ namespace izolabella.Discord.Objects.Interfaces
         /// <summary>
         /// The method that will run if the command has failed due to a <see cref="HttpException"/>.
         /// </summary>
-        /// <param name="Error"></param>
+        /// <param name="Context">The context the handler may pass.</param>
+        /// <param name="Error">The error that caused this method to be invoked.</param>
         /// <returns></returns>
-        public virtual Task OnErrorAsync(HttpException Error)
+        public virtual Task OnErrorAsync(CommandContext? Context, HttpException Error)
         {
             return Task.CompletedTask;
         }
