@@ -2,18 +2,27 @@
 using izolabella.Discord.Objects.Arguments;
 using izolabella.Discord.Objects.Constraints.Interfaces;
 using izolabella.Discord.Objects.Parameters;
+using izolabella.Discord.Objects.Structures.Discord.Commands.Enums;
 
-namespace izolabella.Discord.Objects.Structures.Discord
+namespace izolabella.Discord.Objects.Structures.Discord.Commands
 {
     /// <summary>
     /// An abstract class that defines commands.
-    /// </summary>
-    /// <remarks>
     /// As of now, writing a constructor will cause the handler to not construct the implementing type.
     /// Do not write a constructor.
-    /// </remarks>
+    /// </summary>
     public abstract class IzolabellaCommand
     {
+        /// <summary>
+        /// The type of command this is.
+        /// </summary>
+        public CommandType Command { get; protected set; } = CommandType.Main;
+
+        /// <summary>
+        /// The subcommands belonging to this command.
+        /// </summary>
+        public virtual List<IzolabellaSubCommand> SubCommands { get; } = new();
+
         /// <summary>
         /// The name of the command.
         /// </summary>

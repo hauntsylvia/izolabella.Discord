@@ -11,12 +11,30 @@
         /// <param name="Name"></param>
         /// <param name="Description"></param>
         /// <param name="OptionType"></param>
+        /// <param name="ChannelTypes"></param>
+        /// <param name="IsRequired"></param>
+        public IzolabellaCommandParameter(string Name, string Description, ApplicationCommandOptionType OptionType, List<ChannelType> ChannelTypes, bool IsRequired)
+        {
+            this.Name = Name;
+            this.Description = Description;
+            this.OptionType = OptionType;
+            this.ChannelTypes = ChannelTypes;
+            this.IsRequired = IsRequired;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IzolabellaCommandParameter"/> class.
+        /// </summary>
+        /// <param name="Name"></param>
+        /// <param name="Description"></param>
+        /// <param name="OptionType"></param>
         /// <param name="IsRequired"></param>
         public IzolabellaCommandParameter(string Name, string Description, ApplicationCommandOptionType OptionType, bool IsRequired)
         {
             this.Name = Name;
             this.Description = Description;
             this.OptionType = OptionType;
+            this.ChannelTypes = new();
             this.IsRequired = IsRequired;
         }
 
@@ -34,6 +52,11 @@
         /// The type of this parameter.
         /// </summary>
         public ApplicationCommandOptionType OptionType { get; }
+
+        /// <summary>
+        /// The channel types this parameter is allowed to select, when <see cref="OptionType"/> is <see cref="ApplicationCommandOptionType.Channel"/>
+        /// </summary>
+        public List<ChannelType> ChannelTypes { get; }
 
         /// <summary>
         /// Whether this parameter is required or not.

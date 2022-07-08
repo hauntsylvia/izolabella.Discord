@@ -4,7 +4,7 @@ using Discord.Net;
 using izolabella.Discord.Objects.Arguments;
 using izolabella.Discord.Objects.Constraints.Interfaces;
 using izolabella.Discord.Objects.Parameters;
-using izolabella.Discord.Objects.Structures.Discord;
+using izolabella.Discord.Objects.Structures.Discord.Commands;
 using izolabella.Discord.Objects.Structures.Discord.Receivers;
 using izolabella.Discord.Objects.Util;
 using izolabella.Util;
@@ -337,13 +337,12 @@ namespace izolabella.Discord.Objects.Clients
             return InitializedCommands;
         }
 
-        internal Task<List<SlashCommandBuilder>> GetCommandBuildersAsync()
+        internal static List<SlashCommandOptionBuilder> GetCommandParams(IzolabellaCommand Command)
         {
-            List<SlashCommandBuilder> CommandBuilders = new();
-            foreach (IzolabellaCommand Command in this.Commands)
+            List<SlashCommandOptionBuilder> Options = new();
+            foreach (IzolabellaCommandParameter Param in Command.Parameters)
             {
-                List<SlashCommandOptionBuilder> Options = new();
-                foreach (IzolabellaCommandParameter Param in Command.Parameters)
+                if(Command.SubCommands.Count == 0)
                 {
                     Options.Add(new()
                     {
@@ -357,14 +356,35 @@ namespace izolabella.Discord.Objects.Clients
                         {
                             Name = PC.Name,
                             Value = PC.Value,
-                        }).ToList()
+                        }).ToList(),
+                        ChannelTypes = Param.ChannelTypes
+                    });
+                }
+            }
+            return Options;
+        }
+
+        internal Task<List<SlashCommandBuilder>> GetCommandBuildersAsync()
+        {
+            List<SlashCommandBuilder> CommandBuilders = new();
+            foreach (IzolabellaCommand Command in this.Commands.Where(C => C.Command == Structures.Discord.Commands.Enums.CommandType.Main))
+            {
+                List<SlashCommandOptionBuilder> Parameters = GetCommandParams(Command);
+                foreach(IzolabellaSubCommand SubCommand in Command.SubCommands)
+                {
+                    Parameters.Add(new()
+                    {
+                        Type = ApplicationCommandOptionType.SubCommand,
+                        Name = NameConformer.DiscordCommandConformity(SubCommand.Name),
+                        Description = SubCommand.Description,
+                        Options = GetCommandParams(SubCommand),
                     });
                 }
                 SlashCommandBuilder SlashCommandBuilder = new()
                 {
                     Name = NameConformer.DiscordCommandConformity(Command.Name),
                     Description = Command.Description,
-                    Options = Options,
+                    Options = Parameters,
                     IsDMEnabled = !Command.GuildsOnly
                 };
                 CommandBuilders.Add(SlashCommandBuilder);
@@ -413,8 +433,7 @@ namespace izolabella.Discord.Objects.Clients
                 }
                 else
                 {
-                    this.Guilds.ToList()
-                                      .ForEach(async G => await G.CreateApplicationCommandAsync(Command.Build()));
+                    this.Guilds.ToList().ForEach(async G => await G.CreateApplicationCommandAsync(Command.Build()));
                 }
             }
         }

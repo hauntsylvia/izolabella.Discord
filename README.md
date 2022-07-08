@@ -25,45 +25,79 @@ IzolabellaDiscordCommandClient Client = new(new DiscordSocketConfig(), false);
 
 The current version of this library uses classes for commands. To create a command, create a class that inherits the abstract class `IzolabellaCommand`. **These classes must have parameterless constructors.**
 ```cs
-namespace MyDiscordBot.Commands
+public class MyCommand : IzolabellaCommand
 {
-    public class MyCommand : IzolabellaCommand
+    public override string Name => "Command";
+
+    public override string Description => "My command's description.'";
+
+    public override bool GuildsOnly => true;
+
+    public override List<IIzolabellaCommandConstraint> Constraints { get; } = new()
     {
-        public override string Name => "Command";
+        new WhitelistPermissionsConstraint(false, GuildPermission.Administrator)
+    };
 
-        public override string Description => "My command's description.'";
+    public override List<IzolabellaCommandParameter> Parameters { get; } = new()
+    {
+        new IzolabellaCommandParameter("Param", "This is my parameter!", ApplicationCommandOptionType.Channel, true)
+    };
 
-        public override bool GuildsOnly => true;
+    public override Task RunAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments)
+    {
+        // command runs here!
+    }
 
-        public override List<IIzolabellaCommandConstraint> Constraints { get; } = new();
+    public override Task OnLoadAsync(IIzolabellaCommand[] AllCommands)
+    {
+        // runs when all commands have been initialized - fired once.
+    }
 
-        public override List<IzolabellaCommandParameter> Parameters { get; } = new()
-        {
-            new IzolabellaCommandParameter("Param", "This is my parameter!", ApplicationCommandOptionType.Channel, true)
-        };
-
-        public override Task RunAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments)
-        {
-            // command runs here!
-        }
-
-        public override Task OnLoadAsync(IIzolabellaCommand[] AllCommands)
-        {
-            // runs when all commands have been initialized - fired once.
-        }
-
-        public override Task OnConstrainmentAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments, IIzolabellaCommandConstraint ConstraintThatFailed)
-        {
-            // when one of the constrainments don't pass the validity check by the handler, this method gets called.
-        }
+    public override Task OnConstrainmentAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments, IIzolabellaCommandConstraint ConstraintThatFailed)
+    {
+        // when one of the constrainments don't pass the validity check by the handler, this method gets called.
+    }
         
-        public override Task OnErrorAsync(HttpException Error)
-        {
-            // when an error happens, this method will run.
-        }
+    public override Task OnErrorAsync(HttpException Error)
+    {
+        // when an error happens, this method will run.
     }
 }
 ```
+
+To create sub-commands, a class that inherits from `IzolabellaSubCommand` must be created, initialized, and placed in a list of a normal `IzolabellaCommand`. For example:
+```cs
+public class ExampleSub : IzolabellaSubCommand
+{
+    public override string Name => "Example Name";
+
+    public override string Description => "Example!";
+
+    public override bool GuildsOnly => true;
+
+    public override List<IzolabellaCommandParameter> Parameters => new()
+    {
+        new("Channel", "Pick a channel!", ApplicationCommandOptionType.Channel, new() { ChannelType.Text }, false)
+    };
+
+    public override List<IIzolabellaCommandConstraint> Constraints => new();
+
+    public override async Task RunAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments)
+    {
+        await Context.UserContext.RespondAsync(text: "abc!!");
+    }
+}
+```
+
+Then, in an `IzolabellaCommand`, you can place it in the `SubCommands` property. As a shorter example (borrowing from the previous `IzolabellaCommand` example):
+```cs
+public class MyCommand : IzolabellaCommand
+{
+    public override List<IzolabellaSubCommand> SubCommands => new() { new ExampleSub() };
+}
+```
+
+
 
 To get things going, call the following method on the `IzolabellaDiscordCommandClient` instance you have created:
 ```cs
