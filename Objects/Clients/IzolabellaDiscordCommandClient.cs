@@ -3,8 +3,9 @@ global using Discord.WebSocket;
 using Discord.Net;
 using izolabella.Discord.Objects.Arguments;
 using izolabella.Discord.Objects.Constraints.Interfaces;
-using izolabella.Discord.Objects.Interfaces;
 using izolabella.Discord.Objects.Parameters;
+using izolabella.Discord.Objects.Structures.Discord;
+using izolabella.Discord.Objects.Structures.Discord.Receivers;
 using izolabella.Discord.Objects.Util;
 using izolabella.Util;
 using System.Reflection;
@@ -14,25 +15,26 @@ namespace izolabella.Discord.Objects.Clients
     /// <summary>
     /// A class used for wrapping an instance of <see cref="DiscordSocketClient"/>.
     /// </summary>
-    public class IzolabellaDiscordCommandClient
+    public class IzolabellaDiscordClient : DiscordSocketClient
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="IzolabellaDiscordCommandClient"/>.
+        /// Initializes a new instance of <see cref="IzolabellaDiscordClient"/>.
         /// </summary>
         /// <param name="Config">The client's configurations.</param>
         /// <param name="GlobalCommands">If true, all commands will be created globally. This may take up to an hour to show up on Discord's side.</param>
-        public IzolabellaDiscordCommandClient(DiscordSocketConfig Config, bool GlobalCommands)
+        public IzolabellaDiscordClient(DiscordSocketConfig Config, bool GlobalCommands) : base(Config)
         {
             this.SelfAss = Assembly.GetCallingAssembly();
             this.GlobalCommands = GlobalCommands;
-            this.Client = new(Config);
-            this.Client.Ready += () =>
+            this.Ready += () =>
             {
                 this.ClientReady = true;
                 return Task.CompletedTask;
             };
             this.Commands = GetIzolabellaCommandsAsync(this.SelfAss).Result;
-            this.Client.JoinedGuild += this.ClientJoinedGuildAsync;
+            this.MessageReceivers = this.GetMessageReceivers();
+            this.ReactionReceivers = this.GetReactionReceivers();
+            this.JoinedGuild += this.ClientJoinedGuildAsync;
         }
 
         #region properties
@@ -45,14 +47,19 @@ namespace izolabella.Discord.Objects.Clients
         public bool ClientReady { get; private set; } = false;
 
         /// <summary>
-        /// The wrapped <see cref="DiscordSocketClient"/>.
-        /// </summary>
-        public DiscordSocketClient Client { get; }
-
-        /// <summary>
-        /// The commands found by this instance.
+        /// The <see cref="IzolabellaCommand"/>s found by this instance.
         /// </summary>
         public List<IzolabellaCommand> Commands { get; }
+
+        /// <summary>
+        /// The <see cref="IzolabellaMessageReceiver"/>s found by this instance.
+        /// </summary>
+        public IEnumerable<IzolabellaMessageReceiver> MessageReceivers { get; }
+
+        /// <summary>
+        /// The <see cref="IzolabellaReactionReceiver"/>s found by this instance.
+        /// </summary>
+        public IEnumerable<IzolabellaReactionReceiver> ReactionReceivers { get; }
 
         /// <summary>
         /// A bool representing whether the client should make commands global or not.
@@ -77,14 +84,34 @@ namespace izolabella.Discord.Objects.Clients
         public event CommandConstrainedHandler? OnCommandConstraint;
 
         /// <summary>
-        /// The method that will run if the command fails due to an exception.
+        /// The method that will run if a command fails due to a <see cref="HttpException"/>.
         /// </summary>
         public delegate Task CommandExceptionHandler(IzolabellaCommand? Command, CommandContext? Context, HttpException Exception);
 
         /// <summary>
-        /// Fired when a command errors.
+        /// Fired when an <see cref="IzolabellaCommand"/> errors.
         /// </summary>
         public event CommandExceptionHandler? OnCommandError;
+
+        /// <summary>
+        /// The method that will run if a <see cref="IzolabellaMessageReceiver"/> fails due to a <see cref="HttpException"/>.
+        /// </summary>
+        public delegate Task MessageReceiverExceptionHandler(IzolabellaMessageReceiver Receiver, HttpException Exception);
+
+        /// <summary>
+        /// Fired when an <see cref="IzolabellaMessageReceiver"/> errors.
+        /// </summary>
+        public event MessageReceiverExceptionHandler? OnMessageReceiverError;
+
+        /// <summary>
+        /// The method that will run if a <see cref="IzolabellaReactionReceiver"/> fails due to a <see cref="HttpException"/>.
+        /// </summary>
+        public delegate Task ReactionReceiverExceptionHandler(IzolabellaReactionReceiver Receiver, HttpException Exception);
+
+        /// <summary>
+        /// Fired when a command errors.
+        /// </summary>
+        public event ReactionReceiverExceptionHandler? OnReactionReceiverError;
 
         /// <summary>
         /// The method that will run after a command is invoked.
@@ -124,11 +151,21 @@ namespace izolabella.Discord.Objects.Clients
         /// <summary>
         /// Fired after a the client has joined a guild, but before this client processes it.
         /// </summary>
-        public event BeforeGuildJoinHandler? JoinedGuild;
+        public new event BeforeGuildJoinHandler? JoinedGuild;
 
         #endregion
 
         #region methods
+
+        private IEnumerable<IzolabellaMessageReceiver> GetMessageReceivers()
+        {
+            return BaseImplementationUtil.GetItems<IzolabellaMessageReceiver>(this.SelfAss);
+        }
+
+        private IEnumerable<IzolabellaReactionReceiver> GetReactionReceivers()
+        {
+            return BaseImplementationUtil.GetItems<IzolabellaReactionReceiver>(this.SelfAss);
+        }
 
         /// <summary>
         /// Updates commands.
@@ -140,7 +177,7 @@ namespace izolabella.Discord.Objects.Clients
             if (this.ClientReady)
             {
                 _ = (this.JoinedGuild?.Invoke(Arg));
-                _ = await this.Client.Rest.GetGuildAsync(Arg.Id);
+                _ = await this.Rest.GetGuildAsync(Arg.Id);
                 if (!this.GlobalCommands)
                 {
                     await this.DeleteIrrelevantCommands();
@@ -151,7 +188,7 @@ namespace izolabella.Discord.Objects.Clients
         }
 
         /// <summary>
-        /// Logs in and connects the <see cref="Client"/>.
+        /// Logs in and connects the <see cref="IzolabellaDiscordClient"/>.
         /// </summary>
         /// <param name="Token"></param>
         /// <param name="RegisterCommandsAtTheSameTime">Set to true if calling this method should also register commands.</param>
@@ -160,13 +197,13 @@ namespace izolabella.Discord.Objects.Clients
         {
             if (RegisterCommandsAtTheSameTime)
             {
-                this.Client.Ready += async () =>
+                this.Ready += async () =>
                 {
                     await this.DeleteIrrelevantCommands();
                     await this.RegisterCommandsAsync();
                 };
             }
-            this.Client.SlashCommandExecuted += async (PassedCommand) =>
+            this.SlashCommandExecuted += async (PassedCommand) =>
             {
                 IzolabellaCommand? Command = this.Commands.FirstOrDefault(
                     Iz => NameConformer.DiscordCommandConformity(Iz.Name) == NameConformer.DiscordCommandConformity(PassedCommand.CommandName));
@@ -209,19 +246,52 @@ namespace izolabella.Discord.Objects.Clients
                     }
                 }
             };
-            await this.Client.LoginAsync(TokenType.Bot, Token, true);
-            await this.Client.StartAsync();
+            this.MessageReceived += async (Message) =>
+            {
+                foreach (IzolabellaMessageReceiver ValidReceiver in this.MessageReceivers.Where(MR => MR.ValidPredicate.Invoke(Message)))
+                {
+                    try
+                    {
+                        await ValidReceiver.OnMessageAsync(this, Message);
+                    }
+                    catch (HttpException Ex)
+                    {
+                        this.OnMessageReceiverError?.Invoke(ValidReceiver, Ex);
+                        await ValidReceiver.OnErrorAsync(Ex);
+                    }
+                }
+            };
+            this.ReactionAdded += async (Arg1, Arg2, Arg3) => await this.ClientReactionUpdatedAsync(Arg3, false);
+            this.ReactionRemoved += async (Arg1, Arg2, Arg3) => await this.ClientReactionUpdatedAsync(Arg3, true);
+            await this.LoginAsync(TokenType.Bot, Token, true);
+            await this.StartAsync();
+        }
+
+        private async Task ClientReactionUpdatedAsync(SocketReaction Reaction, bool IsRemoval)
+        {
+            foreach(IzolabellaReactionReceiver ValidReceiver in this.ReactionReceivers.Where(RR => RR.ValidPredicate.Invoke(Reaction)))
+            {
+                try
+                {
+                    await ValidReceiver.OnReactionAsync(this, Reaction, IsRemoval);
+                }
+                catch(HttpException Ex)
+                {
+                    this.OnReactionReceiverError?.Invoke(ValidReceiver, Ex);
+                    await ValidReceiver.OnErrorAsync(Ex);
+                }
+            }
         }
 
         /// <summary>
         /// Logs the client out before disposing its resources.
         /// </summary>
         /// <returns></returns>
-        public async Task StopAsync()
+        public async Task StopAndLogoutAsync()
         {
-            await this.Client.LogoutAsync();
-            await this.Client.StopAsync();
-            await this.Client.DisposeAsync();
+            await this.LogoutAsync();
+            await this.StopAsync();
+            await this.DisposeAsync();
         }
 
         /// <summary>
@@ -306,8 +376,8 @@ namespace izolabella.Discord.Objects.Clients
         {
             List<SocketApplicationCommand> Commands = new();
             Commands = !this.GlobalCommands
-                ? this.Client.Guilds.SelectMany((G) => G.GetApplicationCommandsAsync().Result).Where(C => C.ApplicationId == this.Client.CurrentUser.Id).ToList()
-                : (await this.Client.GetGlobalApplicationCommandsAsync()).ToList();
+                ? this.Guilds.SelectMany((G) => G.GetApplicationCommandsAsync().Result).Where(C => C.ApplicationId == this.CurrentUser.Id).ToList()
+                : (await this.GetGlobalApplicationCommandsAsync()).ToList();
             return Commands;
         }
 
@@ -317,7 +387,7 @@ namespace izolabella.Discord.Objects.Clients
         /// <returns></returns>
         internal async Task<IReadOnlyCollection<SocketApplicationCommand>> GetIrrelevantCommandsAsync()
         {
-            IReadOnlyCollection<SocketApplicationCommand> CurrentCommands = this.GlobalCommands ? this.Client.Guilds.SelectMany((G) =>
+            IReadOnlyCollection<SocketApplicationCommand> CurrentCommands = this.GlobalCommands ? this.Guilds.SelectMany((G) =>
             {
                 try
                 {
@@ -328,7 +398,7 @@ namespace izolabella.Discord.Objects.Clients
                     return new List<SocketApplicationCommand>();
                 }
             }
-            ).Where(C => C.ApplicationId == this.Client.CurrentUser.Id).ToList() : await this.Client.GetGlobalApplicationCommandsAsync();
+            ).Where(C => C.ApplicationId == this.CurrentUser.Id).ToList() : await this.GetGlobalApplicationCommandsAsync();
             return CurrentCommands;
         }
 
@@ -339,11 +409,11 @@ namespace izolabella.Discord.Objects.Clients
             {
                 if (this.GlobalCommands)
                 {
-                    _ = await this.Client.CreateGlobalApplicationCommandAsync(Command.Build());
+                    _ = await this.CreateGlobalApplicationCommandAsync(Command.Build());
                 }
                 else
                 {
-                    this.Client.Guilds.ToList()
+                    this.Guilds.ToList()
                                       .ForEach(async G => await G.CreateApplicationCommandAsync(Command.Build()));
                 }
             }
@@ -353,7 +423,7 @@ namespace izolabella.Discord.Objects.Clients
         {
             foreach (SocketApplicationCommand Command in await this.GetRelevantCommandsAsync())
             {
-                if (Command.ApplicationId == this.Client.CurrentUser.Id)
+                if (Command.ApplicationId == this.CurrentUser.Id)
                 {
                     if (!this.Commands.Any(C => NameConformer.DiscordCommandConformity(C.Name) == Command.Name))
                     {

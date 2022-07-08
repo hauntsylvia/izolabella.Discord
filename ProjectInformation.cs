@@ -1,4 +1,4 @@
-﻿using izolabella.Discord.Objects.Interfaces;
+﻿using izolabella.Discord.Objects.Structures.Discord;
 using System.Reflection;
 
 namespace izolabella.Discord

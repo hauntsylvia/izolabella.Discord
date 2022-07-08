@@ -3,7 +3,7 @@ using izolabella.Discord.Objects.Arguments;
 using izolabella.Discord.Objects.Constraints.Interfaces;
 using izolabella.Discord.Objects.Parameters;
 
-namespace izolabella.Discord.Objects.Interfaces
+namespace izolabella.Discord.Objects.Structures.Discord
 {
     /// <summary>
     /// An abstract class that defines commands.
