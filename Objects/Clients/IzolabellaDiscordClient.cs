@@ -214,14 +214,11 @@ namespace izolabella.Discord.Objects.Clients
                     {
                         GuildId = SUser.Guild.Id;
                     }
-                    List<IzolabellaCommandArgument> SentParameters = new();
-                    foreach (SocketSlashCommandDataOption Argument in PassedCommand.Data.Options)
-                    {
-                        SentParameters.Add(new(Argument.Name, "", Argument.Type, true, Argument.Value));
-                    }
                     SocketSlashCommandDataOption? SubArg = PassedCommand.Data.Options.FirstOrDefault(Opt => Opt.Type == ApplicationCommandOptionType.SubCommand);
+                    IEnumerable<IzolabellaCommandArgument> SentParameters = PassedCommand.Data.Options.Select<SocketSlashCommandDataOption, IzolabellaCommandArgument>(Data => new(Data.Name, "", Data.Type, true, Data.Value));
                     if (SubArg != null && SubArg.Name is string SubArgVal)
                     {
+                        SentParameters = SubArg.Options.Select<SocketSlashCommandDataOption, IzolabellaCommandArgument>(Data => new(Data.Name, "", Data.Type, true, Data.Value));
                         Command = Command.SubCommands.First(C => NameConformer.DiscordCommandConformity(C.Name) == NameConformer.DiscordCommandConformity(SubArgVal));
                     }
                     IIzolabellaCommandConstraint? CausesFailure = Command.Constraints.Where(C => C.ConstrainToOneGuildOfThisId == null || GuildId == null || C.ConstrainToOneGuildOfThisId == GuildId).FirstOrDefault(C => !C.CheckCommandValidityAsync(PassedCommand).Result);
