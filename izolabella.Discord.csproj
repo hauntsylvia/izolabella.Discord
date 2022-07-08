@@ -9,7 +9,7 @@
 	<Version>7.0.0</Version>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<PackageReleaseNotes>
-	    Added command parameter in one of the events.
+	    Added subcommand support, and renamed some elements.
 	</PackageReleaseNotes>
 	<RepositoryUrl>https://github.com/izolabella/izolabella.Discord</RepositoryUrl>
 	<RepositoryType>github</RepositoryType>

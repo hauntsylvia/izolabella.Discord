@@ -18,9 +18,9 @@ dotnet add package izolabella.Discord
 This project uses [Discord.NET](https://www.nuget.org/packages/Discord.Net/) to function!*
 
 # ⌨️ Code
-A new instance of the `IzolabellaDiscordCommandClient` class must be initialized. The class takes a `DiscordSocketConfig` argument for the client, and a `bool` for whether or not the commands should be updated per guild or globally.
+A new instance of the `IzolabellaDiscordClient` class must be initialized. The class takes a `DiscordSocketConfig` argument for the client, and a `bool` for whether or not the commands should be updated per guild or globally.
 ```cs
-IzolabellaDiscordCommandClient Client = new(new DiscordSocketConfig(), false);
+IzolabellaDiscordClient Client = new(new DiscordSocketConfig(), false);
 ```
 
 The current version of this library uses classes for commands. To create a command, create a class that inherits the abstract class `IzolabellaCommand`. **These classes must have parameterless constructors.**
@@ -99,7 +99,7 @@ public class MyCommand : IzolabellaCommand
 
 
 
-To get things going, call the following method on the `IzolabellaDiscordCommandClient` instance you have created:
+To get things going, call the following method on the `IzolabellaDiscordClient` instance you have created:
 ```cs
 await Client.StartAsync();
 ```
