@@ -219,6 +219,11 @@ namespace izolabella.Discord.Objects.Clients
                     {
                         SentParameters.Add(new(Argument.Name, "", Argument.Type, true, Argument.Value));
                     }
+                    SocketSlashCommandDataOption? SubArg = PassedCommand.Data.Options.FirstOrDefault(Opt => Opt.Type == ApplicationCommandOptionType.SubCommand);
+                    if (SubArg != null && SubArg.Name is string SubArgVal)
+                    {
+                        Command = Command.SubCommands.First(C => NameConformer.DiscordCommandConformity(C.Name) == NameConformer.DiscordCommandConformity(SubArgVal));
+                    }
                     IIzolabellaCommandConstraint? CausesFailure = Command.Constraints.Where(C => C.ConstrainToOneGuildOfThisId == null || GuildId == null || C.ConstrainToOneGuildOfThisId == GuildId).FirstOrDefault(C => !C.CheckCommandValidityAsync(PassedCommand).Result);
                     CommandContext Context = new(PassedCommand, this);
                     bool RawCheck = await (this.PreCommandInvokeCheck?.Invoke(Command, Context) ?? Task.FromResult(true));

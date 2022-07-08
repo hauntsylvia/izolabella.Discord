@@ -41,12 +41,12 @@ namespace izolabella.Discord.Objects.Structures.Discord.Commands
         /// <summary>
         /// A list of the parameters users may invoke this command with.
         /// </summary>
-        public abstract List<IzolabellaCommandParameter> Parameters { get; }
+        public virtual List<IzolabellaCommandParameter> Parameters { get; } = new();
 
         /// <summary>
         /// A list of constraints that must all return true for the handler to invoke this command.
         /// </summary>
-        public abstract List<IIzolabellaCommandConstraint> Constraints { get; }
+        public virtual List<IIzolabellaCommandConstraint> Constraints { get; } = new();
 
         /// <summary>
         /// The method that will run when the command is invoked.
@@ -54,7 +54,10 @@ namespace izolabella.Discord.Objects.Structures.Discord.Commands
         /// <param name="Context">The context the handler will pass.</param>
         /// <param name="Arguments">The arguments the end user has invoked this command with.</param>
         /// <returns></returns>
-        public abstract Task RunAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments);
+        public virtual Task RunAsync(CommandContext Context, IzolabellaCommandArgument[] Arguments)
+        {
+            return Task.CompletedTask;
+        }
 
         /// <summary>
         /// The method that will run when all commands have been initialized. Comes from a static context: fired once.
