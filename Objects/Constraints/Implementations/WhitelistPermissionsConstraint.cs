@@ -6,26 +6,21 @@ namespace izolabella.Discord.Objects.Constraints.Implementations
     /// <summary>
     /// A derivation of <see cref="IIzolabellaCommandConstraint"/> regarding a whitelist of users that may invoke the parent command if they hold the correct permissions in a text channel.
     /// </summary>
-    public class WhitelistPermissionsConstraint : IIzolabellaCommandConstraint
+    /// <remarks>
+    /// Initializes an instance of the <see cref="WhitelistPermissionsConstraint"/> class.
+    /// </remarks>
+    public class WhitelistPermissionsConstraint(bool ValidOnlyInGuilds, params GuildPermission[] Permissions) : IIzolabellaCommandConstraint
     {
-        /// <summary>
-        /// Initializes an instance of the <see cref="WhitelistPermissionsConstraint"/> class.
-        /// </summary>
-        public WhitelistPermissionsConstraint(bool ValidOnlyInGuilds, params GuildPermission[] Permissions)
-        {
-            this.ValidOnlyInGuilds = ValidOnlyInGuilds;
-            this.Permissions = Permissions;
-        }
 
         /// <summary>
         /// If true, the constraint will not allow the command to be invoked unless it was invoked in a guild.
         /// </summary>
-        public bool ValidOnlyInGuilds { get; }
+        public bool ValidOnlyInGuilds { get; } = ValidOnlyInGuilds;
 
         /// <summary>
         /// All of the permissions a user must possess to invoke this command.
         /// </summary>
-        public GuildPermission[] Permissions { get; }
+        public GuildPermission[] Permissions { get; } = Permissions;
 
         /// <inheritdoc/>
         public ConstraintTypes Type => ConstraintTypes.WhitelistPermissions;

@@ -1,6 +1,6 @@
 ﻿namespace izolabella.Discord.Objects.Util
 {
-    internal class NameConformer
+    internal sealed class  NameConformer
     {
         internal static string DiscordCommandConformity(string A)
         {
