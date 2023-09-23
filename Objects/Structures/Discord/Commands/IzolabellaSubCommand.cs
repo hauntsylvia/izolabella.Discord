@@ -4,20 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace izolabella.Discord.Objects.Structures.Discord.Commands;
-
-/// <summary>
-/// An abstract class representing a sub command on Discord.
-/// Writing constructors on sub commands is perfectly okay, since they are accessed through main command
-/// properties.
-/// </summary>
-public abstract class IzolabellaSubCommand : IzolabellaCommand
+namespace izolabella.Discord.Objects.Structures.Discord.Commands
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="IzolabellaSubCommand"/> class.
+    /// An abstract class representing a sub command on Discord.
+    /// Writing constructors on sub commands is perfectly okay, since they are accessed through main command
+    /// properties.
     /// </summary>
-    public IzolabellaSubCommand()
+    public abstract class IzolabellaSubCommand : IzolabellaCommand
     {
-        this.Command = Enums.CommandType.Sub;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IzolabellaSubCommand"/> class.
+        /// </summary>
+        public IzolabellaSubCommand()
+        {
+            this.Command = Enums.CommandType.Sub;
+        }
     }
 }

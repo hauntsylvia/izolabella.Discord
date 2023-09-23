@@ -1,9 +1,10 @@
-﻿namespace izolabella.Discord.Objects.Util;
-
-internal class NameConformer
+﻿namespace izolabella.Discord.Objects.Util
 {
-    internal static string DiscordCommandConformity(string A)
+    internal class NameConformer
     {
-        return A.Trim().Replace(' ', '-').ToLower();
+        internal static string DiscordCommandConformity(string A)
+        {
+            return A.Trim().Replace(' ', '-').ToLower();
+        }
     }
 }
